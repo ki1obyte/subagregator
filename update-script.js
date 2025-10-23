@@ -5,20 +5,90 @@ const SOURCES = [
     {
         groupName: "F0rc3Run",
         subscriptions: [
-            { protocol: "Best-Results", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt" },
-            { protocol: "Shadowsocks", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/shadowsocks.txt" },
+            { protocol: "Proxies", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt" },
             { protocol: "VLESS", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt" },
             { protocol: "VMess", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vmess.txt" },
+            { protocol: "Shadowsocks", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/shadowsocks.txt" },
             { protocol: "Trojan", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/trojan.txt" },
+            { protocol: "Telegram", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/main/Special/Telegram.txt" }
         ]
     },
     {
-        groupName: "mahdibland",
+        groupName: "mheidari98",
         subscriptions: [
-            { protocol: "Mixed", url: "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge.txt" }
+            { protocol: "VLESS", url: "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vless" },
+            { protocol: "VMess", url: "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vmess" },
+            { protocol: "Trojan", url: "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/trojan" },
+            { protocol: "Shadowsocks", url: "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/ss" }
+        ]
+    },
+    {
+        groupName: "Epodonios",
+        subscriptions: [
+            { protocol: "VLESS", url: "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/vless.txt" },
+            { protocol: "VMess", url: "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/vmess.txt" },
+            { protocol: "Shadowsocks", url: "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/ss.txt" },
+            { protocol: "SSR", url: "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/ssr.txt" },
+            { protocol: "Trojan", url: "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/trojan.txt" }
+        ]
+    },
+    {
+        groupName: "Firmfox",
+        subscriptions: [
+            { protocol: "VLESS", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/vless.txt" },
+            { protocol: "VMess", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/vmess.txt" },
+            { protocol: "Trojan", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/trojan.txt" },
+            { protocol: "Shadowsocks", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/shadowsocks.txt" },
+            { protocol: "Other", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/other.txt" },
+            { protocol: "MTProto", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/telegram_proxies/mtproto.txt" },
+            { protocol: "SOCKS5 (TG)", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/telegram_proxies/socks5.txt" },
+            { protocol: "SOCKS4", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/proxies/socks4.txt" },
+            { protocol: "SOCKS5", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/proxies/socks5.txt" },
+            { protocol: "HTTPS", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/proxies/https.txt" }
+        ]
+    },
+    {
+        groupName: "shabane",
+        subscriptions: [
+            { protocol: "VLESS", url: "https://raw.githubusercontent.com/shabane/kamaji/master/hub/vless.txt" },
+            { protocol: "VMess", url: "https://raw.githubusercontent.com/shabane/kamaji/master/hub/vmess.txt" },
+            { protocol: "Trojan", url: "https://raw.githubusercontent.com/shabane/kamaji/master/hub/trojan.txt" },
+            { protocol: "Shadowsocks", url: "https://raw.githubusercontent.com/shabane/kamaji/master/hub/ss.txt" }
+        ]
+    },
+    {
+        groupName: "MhdiTaheri",
+        subscriptions: [
+            { protocol: "VLESS", url: "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/vless" },
+            { protocol: "VMess", url: "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/vmess" },
+            { protocol: "Trojan", url: "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/trojan" },
+            { protocol: "Shadowsocks", url: "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/ss" }
+        ]
+    },
+    {
+        groupName: "LalatinaHub",
+        subscriptions: [
+            { protocol: "Mixed", url: "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes" }
+        ]
+    },
+    {
+        groupName: "istanbulsydneyhotel",
+        subscriptions: [
+            { protocol: "Mixed", url: "https://istanbulsydneyhotel.com/blogs/site/sni.php" }
+        ]
+    },
+    {
+        groupName: "acymz",
+        subscriptions: [
+            { protocol: "Mixed", url: "https://raw.githubusercontent.com/acymz/AutoVPN/refs/heads/main/data/V2.txt" }
+        ]
+    },
+    {
+        groupName: "shadowmere.xyz",
+        subscriptions: [
+            { protocol: "Mixed", url: "https://shadowmere.xyz/api/b64sub/" }
         ]
     }
-    // ... добавляйте другие источники по такому же принципу
 ];
 
 async function main() {
@@ -65,3 +135,4 @@ async function main() {
 }
 
 main();
+

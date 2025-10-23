@@ -5,8 +5,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const qrModal = document.getElementById('qrModal');
     const qrModalImage = document.getElementById('qrModalImage');
 
-    const copyIconSVG = `<svg ... > ... </svg>`; // SVG код иконки не меняется, оставьте как есть
-    const qrIconSVG = `<svg ... > ... </svg>`;   // SVG код иконки не меняется, оставьте как есть
+    const copyIconSVG = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px">
+            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+        </svg>`;
+    const qrIconSVG = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px">
+            <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 21h8v-8h-8v8zm2-6h4v4h-4v-4z"/>
+        </svg>`;
 
     async function loadSubscriptions() {
         try {
@@ -33,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.dataset.servers = totalServers;
             card.dataset.date = group.date;
 
-            const formattedDate = new Date(group.date).toLocaleDateString('ru-RU', {
+            const formattedDate = new Date(group.date).toLocaleString('ru-RU', {
                 day: '2-digit', month: '2-digit'
             });
 
@@ -68,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cards = Array.from(cardsContainer.querySelectorAll('.card'));
         cards.sort((a, b) => {
             if (sortBy === 'date') {
-                return new Date(b.dataset.date) - new Date(a.dataset.date);
+                return new Date(b.dataset.date) - new Date(a.date);
             } else {
                 // Сортировка по общему числу серверов в группе
                 return parseInt(b.dataset.servers) - parseInt(a.dataset.servers);
@@ -77,10 +83,31 @@ document.addEventListener('DOMContentLoaded', () => {
         cards.forEach(card => cardsContainer.appendChild(card));
     }
 
-    // Функции copyToClipboard и showQrModal остаются БЕЗ ИЗМЕНЕНИЙ
-    window.copyToClipboard = (text, element) => { /* ... ваш прежний код ... */ };
-    window.showQrModal = (url) => { /* ... ваш прежний код ... */ };
-    qrModal.addEventListener('click', (event) => { /* ... ваш прежний код ... */ });
+    window.copyToClipboard = (text, element) => {
+        navigator.clipboard.writeText(text).then(() => {
+            const originalColor = element.style.color;
+            element.style.color = '#4CAF50'; // Зеленый цвет при успехе
+            setTimeout(() => {
+                element.style.color = originalColor; // Возвращаем исходный цвет через 1.5 сек
+            }, 1500);
+        }).catch(err => {
+            console.error('Ошибка копирования: ', err);
+        });
+    };
+
+    window.showQrModal = (url) => {
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`;
+        qrModalImage.src = qrCodeUrl;
+        qrModal.classList.add('visible'); // Делаем модальное окно видимым
+    };
+
+    qrModal.addEventListener('click', (event) => {
+        // Закрываем окно, только если клик был по самому фону (qrModal), а не по его содержимому
+        if (event.target === qrModal) {
+            qrModal.classList.remove('visible'); // Скрываем окно
+            qrModalImage.src = ""; // Очищаем src, чтобы при следующем открытии не мелькал старый QR-код
+        }
+    });
 
     filterByDate.addEventListener('change', () => sortCards('date'));
     filterByServers.addEventListener('change', () => sortCards('servers'));

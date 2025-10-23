@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
         </svg>`;
     const qrIconSVG = `
-        <svg xmlns="http://www.w.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px">
             <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 21h8v-8h-8v8zm2-6h4v4h-4v-4z"/>
         </svg>`;
 
@@ -40,31 +40,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 day: '2-digit', month: '2-digit'
             });
 
-            const subscriptionsHTML = group.subscriptions.map(sub => {
-                // --- ВОТ ГЛАВНОЕ ИЗМЕНЕНИЕ ---
-                // Получаем только имя файла из полного URL
-                const urlParts = sub.url.split('/');
-                const shortUrl = urlParts[urlParts.length - 1];
-                // --- КОНЕЦ ИЗМЕНЕНИЯ ---
-
-                return `
-                <div class="subscription-item">
-                    <div class="subscription-top-row">
-                        <span class="protocol-name">${sub.protocol}</span>
+            // --- НОВАЯ УПРОЩЕННАЯ СТРУКТУРА ---
+            const subscriptionsHTML = group.subscriptions.map(sub => `
+                <div class="subscription-row">
+                    <span class="protocol-name">${sub.protocol}</span>
+                    <div class="subscription-controls">
                         <div class="card-meta">
                             <div class="card-info-box">${sub.servers}</div>
                             <div class="card-info-box">${formattedDate}</div>
                         </div>
-                    </div>
-                    <div class="card-url-container">
-                        <span class="card-url" title="${sub.url}">${shortUrl}</span>
                         <div class="card-actions">
-                            <button class="icon-button" title="Копировать ссылку" onclick="copyToClipboard('${sub.url}', this)">${copyIconSVG}</button>
-                            <button class="icon-button" title="Показать QR-код" onclick="showQrModal('${sub.url}')">${qrIconSVG}</button>
+                            <button class="icon-button" title="Копировать: ${sub.url}" onclick="copyToClipboard('${sub.url}', this)">${copyIconSVG}</button>
+                            <button class="icon-button" title="QR-код: ${sub.url}" onclick="showQrModal('${sub.url}')">${qrIconSVG}</button>
                         </div>
                     </div>
                 </div>
-            `}).join('');
+            `).join('');
 
             card.innerHTML = `
                 <div class="card-header">${group.groupName}</div>

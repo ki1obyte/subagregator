@@ -7,15 +7,46 @@ body {
     padding: 20px;
 }
 
-/* --- Фильтр --- */
-.filter-switch { /* ... без изменений ... */ }
+/* --- Стили переключателя фильтров --- */
+.filter-switch {
+  position: relative;
+  display: flex;
+  margin: 20px auto;
+  padding: 4px;
+  background: #333;
+  border-radius: 20px;
+  width: 250px;
+}
+.filter-switch input { display: none; }
+.filter-switch .option {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  padding: 8px;
+  color: #fff;
+  z-index: 1;
+  transition: color 0.3s;
+}
+.filter-switch .background {
+  position: absolute;
+  height: calc(100% - 8px);
+  width: 50%;
+  left: 4px;
+  top: 4px;
+  background: #555;
+  border-radius: 16px;
+  transition: left 0.3s;
+}
+#option1:checked ~ .background { left: 4px; }
+#option2:checked ~ .background { left: calc(50% - 4px); }
+
 
 /* --- Новая сетка и стили карточек --- */
 .grid-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
-    max-width: 1200px; /* Увеличим немного для комфорта */
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -46,14 +77,14 @@ body {
 }
 
 .protocol-name {
-    width: 110px; /* Фиксированная ширина для выравнивания */
+    width: 110px;
     font-weight: 500;
     color: #c7c7c7;
-    flex-shrink: 0; /* Чтобы текст не сжимался */
+    flex-shrink: 0;
 }
 
 .card-url-container {
-    flex-grow: 1; /* Занимает все доступное место */
+    flex-grow: 1;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -61,6 +92,7 @@ body {
     padding: 10px;
     border-radius: 8px;
     overflow: hidden;
+    min-width: 0; /* <<< КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ #1: Предотвращает переполнение */
 }
 
 .card-url {
@@ -72,9 +104,31 @@ body {
     color: #b0b0b0;
 }
 
-.card-actions { /* ... без изменений ... */ }
-.icon-button { /* ... без изменений ... */ }
-.icon-button svg { /* ... без изменений ... */ }
+.card-actions {
+    display: flex; /* <<< КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ #2: Располагает кнопки в ряд */
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #b0b0b0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-button:hover {
+    color: #ffffff;
+}
+
+.icon-button svg {
+    width: 20px;
+    height: 20px;
+}
 
 .card-meta {
     display: flex;
@@ -82,19 +136,23 @@ body {
     align-items: center;
     font-size: 14px;
 }
+
 .card-info-box {
     background-color: #3a3a3c;
     padding: 4px 10px;
     border-radius: 6px;
     text-align: center;
+    white-space: nowrap;
 }
 
-/* --- Стили модального окна (без изменений) --- */
-.qr-modal { /* ... без изменений ... */ }
-.qr-modal.visible { /* ... без изменений ... */ }
-.qr-modal-content { /* ... без изменений ... */ }
+/* --- Стили для модального окна QR-кода --- */
+.qr-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; cursor: pointer; }
+.qr-modal.visible { display: flex; }
+.qr-modal-content { background-color: #fefefe; color: #1c1c1e; padding: 25px; border-radius: 10px; text-align: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); cursor: default; }
+.qr-modal-content h3 { margin-top: 0; margin-bottom: 15px; }
+.qr-modal-content img { width: 250px; height: 250px; }
 
-/* --- Адаптивность --- */
+/* --- Адаптивность для мобильных устройств --- */
 @media (max-width: 900px) {
     .grid-container {
         grid-template-columns: 1fr;

@@ -10,28 +10,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helve
 #option2:checked ~ .background { left: calc(50% - 4px); }
 
 /* --- Новая сетка и стили карточек --- */
-.grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 1200px; margin: 0 auto; align-items: start; /* Выравниваем карточки по верху */}
+.grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 1200px; margin: 0 auto; align-items: start; }
 .card { background-color: #2c2c2e; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
 .card-header { font-size: 20px; font-weight: 600; }
 
 .subscriptions-list { display: flex; flex-direction: column; gap: 20px; }
 
-/* --- ИСПРАВЛЕННЫЕ СТИЛИ ДЛЯ ВЕРСТКИ --- */
 .subscription-item { display: flex; flex-direction: column; gap: 8px; }
 
 .subscription-top-row {
     display: flex;
-    justify-content: space-between; /* Главное правило для выравнивания */
+    justify-content: space-between;
     align-items: center;
-    gap: 15px; /* Добавляем отступ между элементами */
 }
 
-.protocol-name {
-    font-weight: 500;
-    color: #c7c7c7;
-    margin-right: auto; /* Заставляет имя протокола "прилипнуть" к левому краю */
-}
-/* --- КОНЕЦ ИСПРАВЛЕНИЙ --- */
+.protocol-name { font-weight: 500; color: #c7c7c7; }
 
 .card-url-container {
     display: flex;
@@ -50,7 +43,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helve
 .icon-button:hover { color: #ffffff; }
 .icon-button svg { width: 20px; height: 20px; }
 
-.card-meta { display: flex; gap: 8px; align-items: center; font-size: 14px; flex-shrink: 0; /* Важно, чтобы блок не сжимался */ }
+.card-meta { display: flex; gap: 8px; align-items: center; font-size: 14px; }
 .card-info-box { background-color: #3a3a3c; padding: 4px 10px; border-radius: 6px; text-align: center; white-space: nowrap; }
 
 /* --- Стили для модального окна QR-кода --- */

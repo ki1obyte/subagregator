@@ -1,5 +1,5 @@
 /* --- Общие стили --- */
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #1c1c1e; color: #e0e0e-0; margin: 0; padding: 20px; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #1c1c1e; color: #e0e0e0; margin: 0; padding: 20px; }
 
 /* --- Стили переключателя фильтров --- */
 .filter-switch { position: relative; display: flex; margin: 20px auto; padding: 4px; background: #333; border-radius: 20px; width: 250px; }
@@ -9,48 +9,51 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helve
 #option1:checked ~ .background { left: 4px; }
 #option2:checked ~ .background { left: calc(50% - 4px); }
 
-/* --- ОБНОВЛЕННАЯ СЕТКА НА ТРИ КОЛОНКИ --- */
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* ГЛАВНОЕ ИЗМЕНЕНИЕ: 3 колонки */
-    gap: 20px;
-    max-width: 1500px; /* Увеличиваем ширину для комфортного отображения */
-    margin: 0 auto;
-    align-items: start;
-}
-/* --- КОНЕЦ ОБНОВЛЕНИЯ СЕТКИ --- */
+/* --- Сетка --- */
+.grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1500px; margin: 0 auto; align-items: start; }
 
+/* --- Стили карточек --- */
 .card { background-color: #2c2c2e; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-.card-header { font-size: 20px; font-weight: 600; }
+
+.card-header {
+    font-size: 20px;
+    font-weight: 600;
+    color: #ffffff; /* ИСПРАВЛЕНИЕ: Явный белый цвет для заголовка */
+}
+
 .subscriptions-list { display: flex; flex-direction: column; gap: 12px; }
+
 .subscription-row { display: flex; justify-content: space-between; align-items: center; background-color: #3a3a3c; padding: 10px 15px; border-radius: 8px; }
-.protocol-name { font-weight: 500; color: #c7c7c7; }
+
+.protocol-name {
+    font-weight: 500;
+    color: #f0f0f0; /* Сделаем чуть ярче для консистентности */
+}
+
 .subscription-controls { display: flex; align-items: center; gap: 20px; }
 .card-meta { display: flex; gap: 8px; align-items: center; font-size: 14px; }
-.card-info-box { background-color: #4a4a4c; padding: 4px 10px; border-radius: 6px; text-align: center; white-space: nowrap; }
+
+.card-info-box {
+    background-color: #4a4a4c;
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-align: center;
+    white-space: nowrap;
+    color: #ffffff; /* ИСПРАВЛЕНИЕ: Явный белый цвет для цифр */
+}
+
 .card-actions { display: flex; gap: 12px; }
 .icon-button { background: none; border: none; cursor: pointer; padding: 0; color: #b0b0b0; display: flex; align-items: center; justify-content: center; }
 .icon-button:hover { color: #ffffff; }
 .icon-button svg { width: 20px; height: 20px; }
 
-/* --- Стили для модального окна QR-кода --- */
+/* --- Стили модального окна --- */
 .qr-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; cursor: pointer; }
 .qr-modal.visible { display: flex; }
 .qr-modal-content { background-color: #fefefe; color: #1c1c1e; padding: 25px; border-radius: 10px; text-align: center; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); cursor: default; }
 .qr-modal-content h3 { margin-top: 0; margin-bottom: 15px; }
 .qr-modal-content img { width: 250px; height: 250px; }
 
-/* --- УЛУЧШЕННАЯ АДАПТИВНОСТЬ --- */
-/* Для планшетов и узких окон браузера -> 2 колонки */
-@media (max-width: 1200px) {
-    .grid-container {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* Для мобильных телефонов -> 1 колонка */
-@media (max-width: 768px) {
-    .grid-container {
-        grid-template-columns: 1fr;
-    }
-}
+/* --- Адаптивность --- */
+@media (max-width: 1200px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }

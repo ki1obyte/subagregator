@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 day: '2-digit', month: '2-digit'
             });
 
-            // --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ ЗДЕСЬ ---
             const subscriptionsHTML = group.subscriptions.map(sub => `
                 <div class="subscription-item">
                     <div class="subscription-top-row">
@@ -59,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `).join('');
-            // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
             card.innerHTML = `
                 <div class="card-header">${group.groupName}</div>

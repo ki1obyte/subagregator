@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('data.json');
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const groups = await response.json();
-            // Сортируем группы по дате по умолчанию
             groups.sort((a, b) => new Date(b.date) - new Date(a.date));
             renderCards(groups);
         } catch (error) {
@@ -33,8 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
         groups.forEach(group => {
             const card = document.createElement('div');
             card.className = 'card';
-
-            // Для сортировки считаем ОБЩЕЕ кол-во серверов в группе
             const totalServers = group.subscriptions.reduce((sum, sub) => sum + sub.servers, 0);
             card.dataset.servers = totalServers;
             card.dataset.date = group.date;
@@ -43,10 +40,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 day: '2-digit', month: '2-digit'
             });
 
-            // Создаем HTML для списка подписок внутри карточки
+            // --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ ЗДЕСЬ ---
             const subscriptionsHTML = group.subscriptions.map(sub => `
-                <div class="subscription-row">
-                    <span class="protocol-name">${sub.protocol}</span>
+                <div class="subscription-item">
+                    <div class="subscription-top-row">
+                        <span class="protocol-name">${sub.protocol}</span>
+                        <div class="card-meta">
+                            <div class="card-info-box">${sub.servers}</div>
+                            <div class="card-info-box">${formattedDate}</div>
+                        </div>
+                    </div>
                     <div class="card-url-container">
                         <span class="card-url">${sub.url}</span>
                         <div class="card-actions">
@@ -54,14 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="icon-button" title="Показать QR-код" onclick="showQrModal('${sub.url}')">${qrIconSVG}</button>
                         </div>
                     </div>
-                    <div class="card-meta">
-                        <div class="card-info-box">${sub.servers}</div>
-                        <div class="card-info-box">${formattedDate}</div>
-                    </div>
                 </div>
             `).join('');
+            // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
-            // Собираем всю карточку
             card.innerHTML = `
                 <div class="card-header">${group.groupName}</div>
                 <div class="subscriptions-list">${subscriptionsHTML}</div>
@@ -73,12 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function sortCards(sortBy) {
         const cards = Array.from(cardsContainer.querySelectorAll('.card'));
         cards.sort((a, b) => {
-            if (sortBy === 'date') {
-                return new Date(b.dataset.date) - new Date(a.date);
-            } else {
-                // Сортировка по общему числу серверов в группе
-                return parseInt(b.dataset.servers) - parseInt(a.dataset.servers);
-            }
+            if (sortBy === 'date') { return new Date(b.dataset.date) - new Date(a.date); } 
+            else { return parseInt(b.dataset.servers) - parseInt(a.dataset.servers); }
         });
         cards.forEach(card => cardsContainer.appendChild(card));
     }
@@ -86,26 +81,21 @@ document.addEventListener('DOMContentLoaded', () => {
     window.copyToClipboard = (text, element) => {
         navigator.clipboard.writeText(text).then(() => {
             const originalColor = element.style.color;
-            element.style.color = '#4CAF50'; // Зеленый цвет при успехе
-            setTimeout(() => {
-                element.style.color = originalColor; // Возвращаем исходный цвет через 1.5 сек
-            }, 1500);
-        }).catch(err => {
-            console.error('Ошибка копирования: ', err);
-        });
+            element.style.color = '#4CAF50';
+            setTimeout(() => { element.style.color = originalColor; }, 1500);
+        }).catch(err => { console.error('Ошибка копирования: ', err); });
     };
 
     window.showQrModal = (url) => {
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`;
         qrModalImage.src = qrCodeUrl;
-        qrModal.classList.add('visible'); // Делаем модальное окно видимым
+        qrModal.classList.add('visible');
     };
 
     qrModal.addEventListener('click', (event) => {
-        // Закрываем окно, только если клик был по самому фону (qrModal), а не по его содержимому
         if (event.target === qrModal) {
-            qrModal.classList.remove('visible'); // Скрываем окно
-            qrModalImage.src = ""; // Очищаем src, чтобы при следующем открытии не мелькал старый QR-код
+            qrModal.classList.remove('visible');
+            qrModalImage.src = "";
         }
     });
 

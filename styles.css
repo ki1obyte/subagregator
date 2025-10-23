@@ -136,3 +136,42 @@ body {
     }
 }
 
+.qr-modal {
+    display: none; /* По умолчанию окно скрыто */
+    position: fixed; /* Фиксированное положение поверх всего */
+    z-index: 1000; /* Выше всех других элементов */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Полупрозрачный черный фон */
+    justify-content: center;
+    align-items: center;
+    cursor: pointer; /* Показываем, что можно кликнуть для закрытия */
+}
+
+/* Этот класс мы будем добавлять через JS, чтобы показать окно */
+.qr-modal.visible {
+    display: flex;
+}
+
+.qr-modal-content {
+    background-color: #fefefe; /* Белый фон для окна */
+    color: #1c1c1e; /* Темный текст */
+    padding: 25px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    cursor: default; /* Обычный курсор внутри самого окна */
+}
+
+.qr-modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.qr-modal-content img {
+    width: 250px; /* Размер QR-кода */
+    height: 250px;
+}
+

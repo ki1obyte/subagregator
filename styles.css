@@ -43,9 +43,11 @@ body {
 /* --- Новая сетка и стили карточек --- */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Строго две колонки */
+    /* --- ВАРИАНТ 2: Адаптивная сетка --- */
+    /* Будет столько колонок по ~500px, сколько поместится */
+    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
     gap: 15px;
-    max-width: 1200px;
+    max-width: 1200px; /* Можно оставить 1200px, сетка сама подстроится */
     margin: 0 auto;
 }
 
@@ -133,3 +135,4 @@ body {
         grid-template-columns: 1fr; /* Одна колонка на маленьких экранах */
     }
 }
+

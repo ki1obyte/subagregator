@@ -1,50 +1,69 @@
 // update-script.js
 const fs = require('fs').promises;
-const axios = require('axios'); // Библиотека для скачивания данных по URL
+const axios = require('axios');
 
-// --- НАСТРОЙКА: Добавьте сюда ссылки на ваши источники подписок ---
+// --- ОБНОВЛЕННАЯ СТРУКТРУРА ИСТОЧНИКОВ ---
 const SOURCES = [
-    { name: "F0rc3Run", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt" },
-    { name: "roosterkid", url: "https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_RAW.txt" },
-    { name: "mahdibland", url: "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/Eternity" },	
-    { name: "wuqb2i4f", url: "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/main/output/base64/mix-uri" }
-    // Добавьте столько источников, сколько нужно
+    {
+        groupName: "F0rc3Run", // Общее имя источника
+        subscriptions: [ // Массив его подписок
+            { protocol: "Best-Results", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt" },
+            { protocol: "Shadowsocks", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/shadowsocks.txt" },
+            { protocol: "VLESS", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt" },
+            { protocol: "VMess", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vmess.txt" },
+            { protocol: "Trojan", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/trojan.txt" },
+        ]
+    },
+    {
+        groupName: "mahdibland", // Пример старого источника с одной ссылкой
+        subscriptions: [
+            { protocol: "Mixed", url: "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge.txt" }
+        ]
+    }
+    // ... сюда можно добавлять другие источники по такому же принципу
 ];
 
+
 async function main() {
-    const subscriptions = [];
-    const today = new Date().toISOString().split('T')[0]; // Сегодняшняя дата в формате YYYY-MM-DD
+    const finalSubscriptions = []; // Тут будем хранить все карточки
+    const today = new Date().toISOString().split('T')[0]; // Сегодняшняя дата
 
+    // Внешний цикл: проходим по каждому источнику (F0rc3Run, mahdibland и т.д.)
     for (const source of SOURCES) {
-        try {
-            console.log(`Загрузка из ${source.name}...`);
-            const response = await axios.get(source.url);
-            const content = response.data;
-            
-            // --- ЛОГИКА ПАРСИНГА: Считаем количество серверов ---
-            // Самый простой способ - посчитать количество строк. 
-            // Каждая строка в таких файлах - это обычно один сервер.
-            const serverCount = content.trim().split('\n').length;
+        // Внутренний цикл: проходим по каждой подписке внутри источника
+        for (const sub of source.subscriptions) {
+            try {
+                const cardTitle = sub.protocol === "Mixed" 
+                    ? source.groupName // Если протокол "Mixed", используем только имя группы
+                    : `${source.groupName} - ${sub.protocol}`; // Иначе, создаем имя "Группа - Протокол"
 
-            if (serverCount > 0) {
-                subscriptions.push({
-                    title: source.name,
-                    servers: serverCount,
-                    date: today,
-                    url: source.url
-                });
-                console.log(`Успешно: ${serverCount} серверов.`);
-            } else {
-                 console.log(`Предупреждение: в ${source.name} не найдено серверов.`);
+                console.log(`Загрузка из ${cardTitle}...`);
+                const response = await axios.get(sub.url);
+                const content = response.data;
+                
+                // Считаем количество серверов, как и раньше
+                const serverCount = content.trim().split('\n').length;
+
+                if (serverCount > 0) {
+                    finalSubscriptions.push({
+                        title: cardTitle,
+                        servers: serverCount,
+                        date: today,
+                        url: sub.url // Важно: используем URL конкретной подписки
+                    });
+                    console.log(`Успешно: ${serverCount} серверов.`);
+                } else {
+                     console.log(`Предупреждение: в ${cardTitle} не найдено серверов.`);
+                }
+
+            } catch (error) {
+                console.error(`Ошибка при загрузке ${source.groupName} (${sub.protocol}): ${error.message}`);
             }
-
-        } catch (error) {
-            console.error(`Ошибка при загрузке ${source.name}: ${error.message}`);
         }
     }
 
     // Сохраняем результат в файл data.json
-    await fs.writeFile('data.json', JSON.stringify(subscriptions, null, 2));
+    await fs.writeFile('data.json', JSON.stringify(finalSubscriptions, null, 2));
     console.log('Файл data.json успешно обновлен!');
 }
 

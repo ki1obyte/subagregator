@@ -1,12 +1,17 @@
 {
-  "name": "subscription-updater",
+  "name": "sub-aggregator-next",
   "version": "1.0.0",
-  "description": "Updates subscription data",
-  "main": "update-script.js",
+  "private": true,
   "scripts": {
-    "start": "node update-script.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "update-data": "node update-script.js"
   },
   "dependencies": {
+    "next": "^13.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "axios": "^1.6.0"
   }
 }

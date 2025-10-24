@@ -218,7 +218,7 @@
       {
         "protocol": "Mixed",
         "url": "https://istanbulsydneyhotel.com/blogs/site/sni.php",
-        "servers": 1359
+        "servers": 1382
       }
     ]
   },
@@ -229,7 +229,7 @@
       {
         "protocol": "Mixed",
         "url": "https://raw.githubusercontent.com/acymz/AutoVPN/refs/heads/main/data/V2.txt",
-        "servers": 122
+        "servers": 252
       }
     ]
   }

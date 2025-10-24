@@ -6,32 +6,32 @@
       {
         "protocol": "Proxies",
         "url": "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt",
-        "servers": 3805
+        "servers": 3723
       },
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt",
-        "servers": 2575
+        "servers": 2529
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vmess.txt",
-        "servers": 282
+        "servers": 209
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/shadowsocks.txt",
-        "servers": 869
+        "servers": 877
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/trojan.txt",
-        "servers": 79
+        "servers": 108
       },
       {
         "protocol": "Telegram",
         "url": "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/main/Special/Telegram.txt",
-        "servers": 639
+        "servers": 638
       }
     ]
   },
@@ -42,22 +42,22 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vless",
-        "servers": 1
+        "servers": 7479
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vmess",
-        "servers": 1
+        "servers": 3853
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/trojan",
-        "servers": 1
+        "servers": 1470
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/ss",
-        "servers": 1
+        "servers": 3259
       }
     ]
   },
@@ -68,27 +68,27 @@
       {
         "protocol": "VLESS",
         "url": "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/vless.txt",
-        "servers": 1
+        "servers": 8947
       },
       {
         "protocol": "VMess",
         "url": "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/vmess.txt",
-        "servers": 882
+        "servers": 886
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/ss.txt",
-        "servers": 1
+        "servers": 1327
       },
       {
         "protocol": "SSR",
         "url": "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/ssr.txt",
-        "servers": 1
+        "servers": 4
       },
       {
         "protocol": "Trojan",
         "url": "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/trojan.txt",
-        "servers": 1
+        "servers": 299
       }
     ]
   },
@@ -99,52 +99,22 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/vless.txt",
-        "servers": 11017
+        "servers": 11139
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/vmess.txt",
-        "servers": 1235
+        "servers": 1392
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/trojan.txt",
-        "servers": 762
+        "servers": 539
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/shadowsocks.txt",
-        "servers": 3309
-      },
-      {
-        "protocol": "Other",
-        "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/other.txt",
-        "servers": 354
-      },
-      {
-        "protocol": "MTProto",
-        "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/telegram_proxies/mtproto.txt",
-        "servers": 2527
-      },
-      {
-        "protocol": "SOCKS5 (TG)",
-        "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/telegram_proxies/socks5.txt",
-        "servers": 28
-      },
-      {
-        "protocol": "SOCKS4",
-        "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/proxies/socks4.txt",
-        "servers": 117034
-      },
-      {
-        "protocol": "SOCKS5",
-        "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/proxies/socks5.txt",
-        "servers": 156017
-      },
-      {
-        "protocol": "HTTPS",
-        "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/proxies/https.txt",
-        "servers": 53632
+        "servers": 3230
       }
     ]
   },
@@ -160,7 +130,7 @@
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/shabane/kamaji/master/hub/vmess.txt",
-        "servers": 84
+        "servers": 212
       },
       {
         "protocol": "Trojan",
@@ -170,7 +140,7 @@
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/shabane/kamaji/master/hub/ss.txt",
-        "servers": 1756
+        "servers": 1885
       }
     ]
   },
@@ -181,22 +151,22 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/vless",
-        "servers": 431
+        "servers": 1042
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/vmess",
-        "servers": 118
+        "servers": 381
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/trojan",
-        "servers": 105
+        "servers": 70
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/ss",
-        "servers": 521
+        "servers": 1557
       }
     ]
   },
@@ -207,7 +177,7 @@
       {
         "protocol": "Mixed",
         "url": "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes",
-        "servers": 13736
+        "servers": 13023
       }
     ]
   },
@@ -218,7 +188,7 @@
       {
         "protocol": "Mixed",
         "url": "https://istanbulsydneyhotel.com/blogs/site/sni.php",
-        "servers": 1937
+        "servers": 1359
       }
     ]
   },
@@ -229,7 +199,7 @@
       {
         "protocol": "Mixed",
         "url": "https://raw.githubusercontent.com/acymz/AutoVPN/refs/heads/main/data/V2.txt",
-        "servers": 1
+        "servers": 122
       }
     ]
   }

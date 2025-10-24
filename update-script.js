@@ -102,39 +102,42 @@ async function main() {
         for (const sub of source.subscriptions) {
             try {
                 console.log(`Загрузка: ${source.groupName} - ${sub.protocol}...`);
-                const response = await axios.get(sub.url, { transformResponse: (res) => res }); // Получаем ответ как "сырой" текст
+                // Получаем ответ как "сырой" текст, без каких-либо преобразований
+                const response = await axios.get(sub.url, { transformResponse: (res) => res });
                 const rawContent = response.data;
 
-                // --- ФИНАЛЬНЫЙ НАДЕЖНЫЙ МЕТОД ПОДСЧЕТА ---
-                const regex = /(vless:\/\/|vmess:\/\/|ss:\/\/|ssr:\/\/|trojan:\/\/)/g;
+                // --- САМЫЙ НАДЕЖНЫЙ МЕТОД ПОДСЧЕТА ---
                 let serverCount = 0;
-                
-                // 1. Сначала ищем в "сыром" тексте
-                const rawMatches = rawContent.match(regex);
-                if (rawMatches) {
-                    serverCount = rawMatches.length;
-                }
+                const lines = rawContent.trim().split(/\r?\n/); // Делим на строки, работает для Windows и Linux
+                const regex = /(vless:\/\/|vmess:\/\/|ss:\/\/|ssr:\/\/|trojan:\/\/)/g;
 
-                // 2. Если ничего не найдено, пробуем декодировать из Base64
-                if (serverCount === 0) {
+                for (const line of lines) {
+                    const trimmedLine = line.trim();
+                    // Пропускаем пустые строки или комментарии
+                    if (trimmedLine.length < 10 || trimmedLine.startsWith('#')) {
+                        continue;
+                    }
+
+                    // 1. Пытаемся найти протоколы в "сырой" строке
+                    let matches = trimmedLine.match(regex);
+                    if (matches) {
+                        serverCount += matches.length;
+                        continue; // Нашли, переходим к следующей строке
+                    }
+
+                    // 2. Если не нашли, пытаемся декодировать СТРОКУ из Base64
                     try {
-                        // Используем Buffer для декодирования
-                        const decodedContent = Buffer.from(rawContent, 'base64').toString('utf-8');
-                        const decodedMatches = decodedContent.match(regex);
-                        if (decodedMatches) {
-                            serverCount = decodedMatches.length;
+                        const decodedLine = Buffer.from(trimmedLine, 'base64').toString('utf-8');
+                        matches = decodedLine.match(regex);
+                        if (matches) {
+                            serverCount += matches.length;
                         }
                     } catch (e) {
-                        // Если декодирование не удалось, это не Base64, ничего страшного.
-                        // console.log(` -> Не является Base64.`);
+                        // Если строка не является валидным Base64, просто игнорируем ее.
+                        // Это нормальное поведение для строк с метаданными или комментариями.
                     }
                 }
-
-                // 3. Если и после этого 0, используем старый метод подсчета строк как последний шанс
-                if (serverCount === 0) {
-                    serverCount = rawContent.trim().split('\n').filter(line => line.length > 10).length;
-                }
-                // --- КОНЕЦ ФИНАЛЬНОГО МЕТОДА ---
+                // --- КОНЕЦ МЕТОДА ПОДСЧЕТА ---
 
                 if (serverCount > 0) {
                     newGroup.subscriptions.push({ protocol: sub.protocol, url: sub.url, servers: serverCount });
@@ -152,7 +155,6 @@ async function main() {
         }
     }
 
-    // Убедитесь, что путь правильный для Next.js проекта
     await fs.writeFile('public/data.json', JSON.stringify(finalGroups, null, 2));
     console.log('Файл data.json успешно обновлен!');
 }

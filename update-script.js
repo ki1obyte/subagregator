@@ -102,42 +102,44 @@ async function main() {
         for (const sub of source.subscriptions) {
             try {
                 console.log(`Загрузка: ${source.groupName} - ${sub.protocol}...`);
-                // Получаем ответ как "сырой" текст, без каких-либо преобразований
                 const response = await axios.get(sub.url, { transformResponse: (res) => res });
                 const rawContent = response.data;
 
-                // --- САМЫЙ НАДЕЖНЫЙ МЕТОД ПОДСЧЕТА ---
                 let serverCount = 0;
-                const lines = rawContent.trim().split(/\r?\n/); // Делим на строки, работает для Windows и Linux
+                const lines = rawContent.trim().split(/\r?\n/);
                 const regex = /(vless:\/\/|vmess:\/\/|ss:\/\/|ssr:\/\/|trojan:\/\/)/g;
 
                 for (const line of lines) {
                     const trimmedLine = line.trim();
-                    // Пропускаем пустые строки или комментарии
-                    if (trimmedLine.length < 10 || trimmedLine.startsWith('#')) {
-                        continue;
-                    }
+                    if (trimmedLine.length < 10 || trimmedLine.startsWith('#')) continue;
 
-                    // 1. Пытаемся найти протоколы в "сырой" строке
                     let matches = trimmedLine.match(regex);
                     if (matches) {
                         serverCount += matches.length;
-                        continue; // Нашли, переходим к следующей строке
+                        continue;
                     }
 
-                    // 2. Если не нашли, пытаемся декодировать СТРОКУ из Base64
                     try {
                         const decodedLine = Buffer.from(trimmedLine, 'base64').toString('utf-8');
                         matches = decodedLine.match(regex);
                         if (matches) {
                             serverCount += matches.length;
                         }
-                    } catch (e) {
-                        // Если строка не является валидным Base64, просто игнорируем ее.
-                        // Это нормальное поведение для строк с метаданными или комментариями.
-                    }
+                    } catch (e) { /* Игнорируем ошибки декодирования */ }
                 }
-                // --- КОНЕЦ МЕТОДА ПОДСЧЕТА ---
+
+                // --- ВОТ ГЛАВНОЕ ИСПРАВЛЕНИЕ ---
+                // Если после всех умных проверок серверов все еще 0,
+                // то считаем, что это простой список (SOCKS, HTTP, и т.д.) и считаем строки.
+                if (serverCount === 0) {
+                    console.log(` -> Префиксы не найдены. Используем подсчет по строкам.`);
+                    serverCount = lines.filter(line => {
+                        const trimmed = line.trim();
+                        // Считаем строку валидной, если она не пустая и не комментарий
+                        return trimmed.length > 0 && !trimmed.startsWith('#');
+                    }).length;
+                }
+                // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
                 if (serverCount > 0) {
                     newGroup.subscriptions.push({ protocol: sub.protocol, url: sub.url, servers: serverCount });
@@ -160,3 +162,4 @@ async function main() {
 }
 
 main();
+

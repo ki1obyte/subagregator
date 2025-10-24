@@ -1,21 +1,22 @@
 export const config = {
-  matcher: '/', // Применять защиту только к главной странице
+  matcher: '/',
 };
 
 export function middleware(req) {
   const basicAuth = req.headers.get('authorization');
   
-  // --- ВАШИ ДАННЫЕ ДЛЯ ВХОДА ---
-  const USER = 'admin';       // Замените на свой логин
-  const PASS = '6367'; // Замените на свой СЛОЖНЫЙ пароль
-  // ---------------------------------
-
+  // Читаем логин и пароль из безопасных переменных окружения
+  const USER = process.env.BASIC_AUTH_USER;
+  const PASS = process.env.BASIC_AUTH_PASS;
+  
   if (basicAuth) {
     const authValue = basicAuth.split(' ')[1];
+    // atob() декодирует строку из Base64
     const [user, pass] = atob(authValue).split(':');
 
     if (user === USER && pass === PASS) {
-      return new Response(null, { status: 200 }); // Доступ разрешен
+      // Если логин и пароль верны, разрешаем доступ
+      return new Response(null, { status: 200 });
     }
   }
   

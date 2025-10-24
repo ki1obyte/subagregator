@@ -1,6 +1,7 @@
 const fs = require('fs').promises;
 const axios = require('axios');
 
+// Ваш список SOURCES остается без изменений
 const SOURCES = [
     {
         groupName: "F0rc3Run",
@@ -96,25 +97,47 @@ async function main() {
     const today = new Date().toISOString().split('T')[0];
 
     for (const source of SOURCES) {
-        const newGroup = {
-            groupName: source.groupName,
-            date: today,
-            subscriptions: []
-        };
+        const newGroup = { groupName: source.groupName, date: today, subscriptions: [] };
 
         for (const sub of source.subscriptions) {
             try {
                 console.log(`Загрузка: ${source.groupName} - ${sub.protocol}...`);
-                const response = await axios.get(sub.url);
-                const content = response.data;
-                const serverCount = content.trim().split('\n').length;
+                const response = await axios.get(sub.url, { transformResponse: (res) => res }); // Получаем ответ как "сырой" текст
+                const rawContent = response.data;
+
+                // --- ФИНАЛЬНЫЙ НАДЕЖНЫЙ МЕТОД ПОДСЧЕТА ---
+                const regex = /(vless:\/\/|vmess:\/\/|ss:\/\/|ssr:\/\/|trojan:\/\/)/g;
+                let serverCount = 0;
+                
+                // 1. Сначала ищем в "сыром" тексте
+                const rawMatches = rawContent.match(regex);
+                if (rawMatches) {
+                    serverCount = rawMatches.length;
+                }
+
+                // 2. Если ничего не найдено, пробуем декодировать из Base64
+                if (serverCount === 0) {
+                    try {
+                        // Используем Buffer для декодирования
+                        const decodedContent = Buffer.from(rawContent, 'base64').toString('utf-8');
+                        const decodedMatches = decodedContent.match(regex);
+                        if (decodedMatches) {
+                            serverCount = decodedMatches.length;
+                        }
+                    } catch (e) {
+                        // Если декодирование не удалось, это не Base64, ничего страшного.
+                        // console.log(` -> Не является Base64.`);
+                    }
+                }
+
+                // 3. Если и после этого 0, используем старый метод подсчета строк как последний шанс
+                if (serverCount === 0) {
+                    serverCount = rawContent.trim().split('\n').filter(line => line.length > 10).length;
+                }
+                // --- КОНЕЦ ФИНАЛЬНОГО МЕТОДА ---
 
                 if (serverCount > 0) {
-                    newGroup.subscriptions.push({
-                        protocol: sub.protocol,
-                        url: sub.url,
-                        servers: serverCount
-                    });
+                    newGroup.subscriptions.push({ protocol: sub.protocol, url: sub.url, servers: serverCount });
                     console.log(` -> Успешно: ${serverCount} серверов.`);
                 } else {
                     console.log(` -> Предупреждение: 0 серверов.`);
@@ -124,15 +147,14 @@ async function main() {
             }
         }
         
-        // Добавляем группу в итоговый список, только если в ней есть хотя бы одна рабочая подписка
         if (newGroup.subscriptions.length > 0) {
             finalGroups.push(newGroup);
         }
     }
 
-    await fs.writeFile('data.json', JSON.stringify(finalGroups, null, 2));
-    console.log('Файл data.json успешно обновлен в новом групповом формате!');
+    // Убедитесь, что путь правильный для Next.js проекта
+    await fs.writeFile('public/data.json', JSON.stringify(finalGroups, null, 2));
+    console.log('Файл data.json успешно обновлен!');
 }
 
 main();
-

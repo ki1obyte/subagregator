@@ -1,17 +1,17 @@
+// components/Aggregator.js
 import { useEffect, useState } from 'react';
 
-// --- ФИНАЛЬНЫЙ ИСПРАВЛЕННЫЙ КОД ---
-
-// --- Вспомогательные функции, вынесенные за пределы компонента ---
 const copyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
 const qrIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 21h8v-8h-8v8zm2-6h4v4h-4v-4z"/></svg>`;
 
 const copyToClipboard = (text, element) => {
-    navigator.clipboard.writeText(text).then(() => {
-        const originalColor = element.style.color;
-        element.style.color = '#4CAF50';
-        setTimeout(() => { element.style.color = originalColor; }, 1500);
-    }).catch(err => console.error('Ошибка копирования: ', err));
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            const originalColor = element.style.color;
+            element.style.color = '#4CAF50';
+            setTimeout(() => { element.style.color = originalColor; }, 1500);
+        }).catch(err => console.error('Ошибка копирования: ', err));
+    }
 };
 
 const showQrModal = (url) => {
@@ -24,7 +24,6 @@ const showQrModal = (url) => {
     }
 };
 
-// --- Компонент Карточки ---
 function SubscriptionCard({ group }) {
     const formattedDate = new Date(group.date).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit' });
 
@@ -56,21 +55,16 @@ function SubscriptionCard({ group }) {
     );
 }
 
-// --- Главный Компонент Страницы ---
-export default function HomePage() {
+export default function Aggregator() {
     const [groups, setGroups] = useState([]);
     const [sortBy, setSortBy] = useState('date');
 
     useEffect(() => {
         const qrModal = document.getElementById('qrModal');
         const closeModal = (event) => {
-            if (event.target === qrModal) {
-                qrModal.classList.remove('visible');
-            }
+            if (event.target === qrModal) qrModal.classList.remove('visible');
         };
-        if (qrModal) {
-            qrModal.addEventListener('click', closeModal);
-        }
+        if (qrModal) qrModal.addEventListener('click', closeModal);
         
         async function loadSubscriptions() {
             try {
@@ -84,11 +78,8 @@ export default function HomePage() {
         }
         loadSubscriptions();
 
-        // Очистка слушателя событий при размонтировании компонента
         return () => {
-            if (qrModal) {
-                qrModal.removeEventListener('click', closeModal);
-            }
+            if (qrModal) qrModal.removeEventListener('click', closeModal);
         };
     }, []);
 
@@ -103,13 +94,6 @@ export default function HomePage() {
 
     return (
         <>
-            <Head>
-                <meta charSet="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <title>Агрегатор подписок</title>
-                <link rel="stylesheet" href="/styles.css" />
-            </Head>
-
             <div id="firstFilter" className="filter-switch">
                 <input checked={sortBy === 'date'} onChange={() => setSortBy('date')} id="option1" name="options" type="radio" />
                 <label className="option" htmlFor="option1">По дате</label>
@@ -122,7 +106,7 @@ export default function HomePage() {
                 {sortedGroups.length > 0 ? (
                     sortedGroups.map((group, index) => <SubscriptionCard group={group} key={index} />)
                 ) : (
-                    <p>Загрузка данных...</p> // Показываем сообщение о загрузке
+                    <p style={{ textAlign: 'center', gridColumn: '1 / -1' }}>Загрузка данных...</p>
                 )}
             </div>
               

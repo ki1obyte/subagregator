@@ -27,4 +27,5 @@ export function middleware(req) {
       'WWW-Authenticate': 'Basic realm="Secure Area"',
     },
   });
-}
+} 
+

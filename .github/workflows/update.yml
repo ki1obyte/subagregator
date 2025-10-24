@@ -31,7 +31,7 @@ jobs:
 
       # 4. Запускаем наш скрипт обновления
       - name: Run update script
-        run: node update-script.js
+        run: npm run update-data
 
       # 5. Сохраняем изменения (новый data.json) в репозиторий
       - name: Commit and push if changed

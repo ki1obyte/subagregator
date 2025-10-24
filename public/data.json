@@ -42,7 +42,7 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vless",
-        "servers": 7476
+        "servers": 7486
       },
       {
         "protocol": "VMess",
@@ -52,12 +52,12 @@
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/trojan",
-        "servers": 1472
+        "servers": 1471
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/ss",
-        "servers": 3259
+        "servers": 3262
       }
     ]
   },
@@ -67,28 +67,28 @@
     "subscriptions": [
       {
         "protocol": "VLESS",
-        "url": "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/vless.txt",
-        "servers": 8947
+        "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vless.txt",
+        "servers": 8939
       },
       {
         "protocol": "VMess",
-        "url": "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/vmess.txt",
-        "servers": 886
+        "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vmess.txt",
+        "servers": 858
       },
       {
         "protocol": "Shadowsocks",
-        "url": "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/ss.txt",
-        "servers": 1327
+        "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/ss.txt",
+        "servers": 1354
       },
       {
         "protocol": "SSR",
-        "url": "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/ssr.txt",
+        "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/ssr.txt",
         "servers": 4
       },
       {
         "protocol": "Trojan",
-        "url": "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/trojan.txt",
-        "servers": 299
+        "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/trojan.txt",
+        "servers": 294
       }
     ]
   },
@@ -99,52 +99,63 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/vless.txt",
-        "servers": 11134
+        "servers": 11118
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/vmess.txt",
-        "servers": 1385
+        "servers": 1363
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/trojan.txt",
-        "servers": 555
+        "servers": 550
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/shadowsocks.txt",
-        "servers": 3228
+        "servers": 3238
       },
       {
         "protocol": "Other",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/v2ray_configs/seperated_by_protocol/other.txt",
-        "servers": 353
+        "servers": 363
       },
       {
         "protocol": "MTProto",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/telegram_proxies/mtproto.txt",
-        "servers": 2503
+        "servers": 2521
       },
       {
         "protocol": "SOCKS5 (TG)",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/telegram_proxies/socks5.txt",
-        "servers": 41
+        "servers": 50
       },
       {
         "protocol": "SOCKS4",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/proxies/socks4.txt",
-        "servers": 117251
+        "servers": 117278
       },
       {
         "protocol": "SOCKS5",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/proxies/socks5.txt",
-        "servers": 156164
+        "servers": 156218
       },
       {
         "protocol": "HTTPS",
         "url": "https://raw.githubusercontent.com/Firmfox/proxify/main/proxies/https.txt",
-        "servers": 53405
+        "servers": 53397
+      }
+    ]
+  },
+  {
+    "groupName": "LalatinaHub",
+    "date": "2025-10-24",
+    "subscriptions": [
+      {
+        "protocol": "Mixed",
+        "url": "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes",
+        "servers": 13271
       }
     ]
   },
@@ -181,33 +192,22 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/vless",
-        "servers": 1027
+        "servers": 1014
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/vmess",
-        "servers": 381
+        "servers": 380
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/trojan",
-        "servers": 76
+        "servers": 74
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/ss",
-        "servers": 1539
-      }
-    ]
-  },
-  {
-    "groupName": "LalatinaHub",
-    "date": "2025-10-24",
-    "subscriptions": [
-      {
-        "protocol": "Mixed",
-        "url": "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes",
-        "servers": 12725
+        "servers": 1521
       }
     ]
   },
@@ -229,7 +229,188 @@
       {
         "protocol": "Mixed",
         "url": "https://raw.githubusercontent.com/acymz/AutoVPN/refs/heads/main/data/V2.txt",
-        "servers": 252
+        "servers": 258
+      }
+    ]
+  },
+  {
+    "groupName": "AzadNetCH",
+    "date": "2025-10-24",
+    "subscriptions": [
+      {
+        "protocol": "Mixed",
+        "url": "https://raw.githubusercontent.com/AzadNetCH/Clash/main/AzadNet.txt",
+        "servers": 2784
+      }
+    ]
+  },
+  {
+    "groupName": "wuqb2i4f",
+    "date": "2025-10-24",
+    "subscriptions": [
+      {
+        "protocol": "Trojan",
+        "url": "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/refs/heads/main/output/base64/mix-protocol-tr",
+        "servers": 10
+      },
+      {
+        "protocol": "VLESS",
+        "url": "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/refs/heads/main/output/base64/mix-protocol-vl",
+        "servers": 257
+      },
+      {
+        "protocol": "VMess",
+        "url": "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/refs/heads/main/output/base64/mix-protocol-vm",
+        "servers": 282
+      }
+    ]
+  },
+  {
+    "groupName": "liketolivefree",
+    "date": "2025-10-24",
+    "subscriptions": [
+      {
+        "protocol": "Mixed",
+        "url": "https://raw.githubusercontent.com/liketolivefree/kobabi/refs/heads/main/sub_all.txt",
+        "servers": 845
+      }
+    ]
+  },
+  {
+    "groupName": "mahdibland",
+    "date": "2025-10-24",
+    "subscriptions": [
+      {
+        "protocol": "VMess",
+        "url": "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/splitted/vmess.txt",
+        "servers": 1965
+      },
+      {
+        "protocol": "Trojan",
+        "url": "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/splitted/trojan.txt",
+        "servers": 715
+      },
+      {
+        "protocol": "SSR",
+        "url": "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/splitted/ssr.txt",
+        "servers": 25
+      },
+      {
+        "protocol": "Shadowsocks",
+        "url": "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/splitted/ss.txt",
+        "servers": 2374
+      }
+    ]
+  },
+  {
+    "groupName": "STR97",
+    "date": "2025-10-24",
+    "subscriptions": [
+      {
+        "protocol": "Mixed",
+        "url": "https://raw.githubusercontent.com/STR97/STRUGOV/refs/heads/main/STR.BYPASS",
+        "servers": 166
+      }
+    ]
+  },
+  {
+    "groupName": "roosterkid",
+    "date": "2025-10-24",
+    "subscriptions": [
+      {
+        "protocol": "HTTPS",
+        "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/HTTPS_RAW.txt",
+        "servers": 61
+      },
+      {
+        "protocol": "SOCKS4",
+        "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/SOCKS4_RAW.txt",
+        "servers": 150
+      },
+      {
+        "protocol": "SOCKS5",
+        "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/SOCKS5_RAW.txt",
+        "servers": 12
+      },
+      {
+        "protocol": "V2Ray",
+        "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/V2RAY_RAW.txt",
+        "servers": 150
+      }
+    ]
+  },
+  {
+    "groupName": "ssrsub",
+    "date": "2025-10-24",
+    "subscriptions": [
+      {
+        "protocol": "Hysteria2",
+        "url": "https://raw.githubusercontent.com/ssrsub/ssr/refs/heads/master/hysteria2.txt",
+        "servers": 7
+      },
+      {
+        "protocol": "Shadowsocks",
+        "url": "https://raw.githubusercontent.com/ssrsub/ssr/refs/heads/master/ss.txt",
+        "servers": 22
+      },
+      {
+        "protocol": "Trojan",
+        "url": "https://raw.githubusercontent.com/ssrsub/ssr/refs/heads/master/trojan.txt",
+        "servers": 326
+      },
+      {
+        "protocol": "VLESS",
+        "url": "https://raw.githubusercontent.com/ssrsub/ssr/refs/heads/master/vless.txt",
+        "servers": 18
+      },
+      {
+        "protocol": "VMess",
+        "url": "https://raw.githubusercontent.com/ssrsub/ssr/refs/heads/master/vmess.txt",
+        "servers": 12
+      }
+    ]
+  },
+  {
+    "groupName": "aiboboxx",
+    "date": "2025-10-24",
+    "subscriptions": [
+      {
+        "protocol": "Mixed",
+        "url": "https://raw.githubusercontent.com/free-nodes/v2rayfree/refs/heads/main/v2",
+        "servers": 115
+      }
+    ]
+  },
+  {
+    "groupName": "mehran1404",
+    "date": "2025-10-24",
+    "subscriptions": [
+      {
+        "protocol": "Mixed",
+        "url": "https://raw.githubusercontent.com/mehran1404/Sub_Link/refs/heads/main/V2RAY-Sub.txt",
+        "servers": 72
+      }
+    ]
+  },
+  {
+    "groupName": "Kwinshadow",
+    "date": "2025-10-24",
+    "subscriptions": [
+      {
+        "protocol": "Mixed",
+        "url": "https://raw.githubusercontent.com/Kwinshadow/TelegramV2rayCollector/main/sublinks/mix.txt",
+        "servers": 40
+      }
+    ]
+  },
+  {
+    "groupName": "Pawdroid",
+    "date": "2025-10-24",
+    "subscriptions": [
+      {
+        "protocol": "Mixed",
+        "url": "https://raw.githubusercontent.com/Pawdroid/Free-servers/refs/heads/main/static/sub_ru",
+        "servers": 11
       }
     ]
   }

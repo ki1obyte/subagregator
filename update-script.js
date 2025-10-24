@@ -1,7 +1,6 @@
 const fs = require('fs').promises;
 const axios = require('axios');
 
-// Ваш список SOURCES остается без изменений
 const SOURCES = [
     {
         groupName: "F0rc3Run",
@@ -26,11 +25,11 @@ const SOURCES = [
     {
         groupName: "Epodonios",
         subscriptions: [
-            { protocol: "VLESS", url: "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/vless.txt" },
-            { protocol: "VMess", url: "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/vmess.txt" },
-            { protocol: "Shadowsocks", url: "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/ss.txt" },
-            { protocol: "SSR", url: "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/ssr.txt" },
-            { protocol: "Trojan", url: "https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/trojan.txt" }
+            { protocol: "VLESS", url: "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vless.txt" },
+            { protocol: "VMess", url: "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vmess.txt" },
+            { protocol: "Shadowsocks", url: "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/ss.txt" },
+            { protocol: "SSR", url: "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/ssr.txt" },
+            { protocol: "Trojan", url: "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/trojan.txt" }
         ]
     },
     {
@@ -46,6 +45,12 @@ const SOURCES = [
             { protocol: "SOCKS4", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/proxies/socks4.txt" },
             { protocol: "SOCKS5", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/proxies/socks5.txt" },
             { protocol: "HTTPS", url: "https://raw.githubusercontent.com/Firmfox/proxify/main/proxies/https.txt" }
+        ]
+    },
+    {
+        groupName: "LalatinaHub",
+        subscriptions: [
+            { protocol: "Mixed", url: "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes" }
         ]
     },
     {
@@ -67,12 +72,6 @@ const SOURCES = [
         ]
     },
     {
-        groupName: "LalatinaHub",
-        subscriptions: [
-            { protocol: "Mixed", url: "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes" }
-        ]
-    },
-    {
         groupName: "istanbulsydneyhotel",
         subscriptions: [
             { protocol: "Mixed", url: "https://istanbulsydneyhotel.com/blogs/site/sni.php" }
@@ -84,10 +83,89 @@ const SOURCES = [
             { protocol: "Mixed", url: "https://raw.githubusercontent.com/acymz/AutoVPN/refs/heads/main/data/V2.txt" }
         ]
     },
+    // ПРЕДУПРЕЖДЕНИЕ: Этот источник защищен Cloudflare и, скорее всего, не будет работать.
     {
         groupName: "shadowmere.xyz",
         subscriptions: [
             { protocol: "Mixed", url: "https://shadowmere.xyz/api/b64sub/" }
+        ]
+    },
+    {
+        groupName: "AzadNetCH",
+        subscriptions: [
+            { protocol: "Mixed", url: "https://raw.githubusercontent.com/AzadNetCH/Clash/main/AzadNet.txt" }
+        ]
+    },
+    {
+        groupName: "wuqb2i4f",
+        subscriptions: [
+            { protocol: "Trojan", url: "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/refs/heads/main/output/base64/mix-protocol-tr" },
+            { protocol: "VLESS", url: "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/refs/heads/main/output/base64/mix-protocol-vl" },
+            { protocol: "VMess", url: "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/refs/heads/main/output/base64/mix-protocol-vm" }
+        ]
+    },
+    {
+        groupName: "liketolivefree",
+        subscriptions: [
+            { protocol: "Mixed", url: "https://raw.githubusercontent.com/liketolivefree/kobabi/refs/heads/main/sub_all.txt" }
+        ]
+    },
+    {
+        groupName: "mahdibland",
+        subscriptions: [
+            { protocol: "VMess", url: "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/splitted/vmess.txt" },
+            { protocol: "Trojan", url: "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/splitted/trojan.txt" },
+            { protocol: "SSR", url: "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/splitted/ssr.txt" },
+            { protocol: "Shadowsocks", url: "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/splitted/ss.txt" }
+        ]
+    },
+    {
+        groupName: "STR97",
+        subscriptions: [
+            { protocol: "Mixed", url: "https://raw.githubusercontent.com/STR97/STRUGOV/refs/heads/main/STR.BYPASS" }
+        ]
+    },
+    {
+        groupName: "roosterkid",
+        subscriptions: [
+            { protocol: "HTTPS", url: "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/HTTPS_RAW.txt" },
+            { protocol: "SOCKS4", url: "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/SOCKS4_RAW.txt" },
+            { protocol: "SOCKS5", url: "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/SOCKS5_RAW.txt" },
+            { protocol: "V2Ray", url: "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/V2RAY_RAW.txt" }
+        ]
+    },
+    {
+        groupName: "ssrsub",
+        subscriptions: [
+            { protocol: "Hysteria2", url: "https://raw.githubusercontent.com/ssrsub/ssr/refs/heads/master/hysteria2.txt" },
+            { protocol: "Shadowsocks", url: "https://raw.githubusercontent.com/ssrsub/ssr/refs/heads/master/ss.txt" },
+            { protocol: "Trojan", url: "https://raw.githubusercontent.com/ssrsub/ssr/refs/heads/master/trojan.txt" },
+            { protocol: "VLESS", url: "https://raw.githubusercontent.com/ssrsub/ssr/refs/heads/master/vless.txt" },
+            { protocol: "VMess", url: "https://raw.githubusercontent.com/ssrsub/ssr/refs/heads/master/vmess.txt" }
+        ]
+    },
+    {
+        groupName: "aiboboxx",
+        subscriptions: [
+            { protocol: "Mixed", url: "https://raw.githubusercontent.com/free-nodes/v2rayfree/refs/heads/main/v2" }
+        ]
+    },
+    {
+        groupName: "mehran1404",
+        subscriptions: [
+            { protocol: "Mixed", url: "https://raw.githubusercontent.com/mehran1404/Sub_Link/refs/heads/main/V2RAY-Sub.txt" }
+        ]
+    },
+    {
+        groupName: "Kwinshadow",
+        subscriptions: [
+            { protocol: "Mixed", url: "https://raw.githubusercontent.com/Kwinshadow/TelegramV2rayCollector/main/sublinks/mix.txt" }
+        ]
+    },
+    {
+        groupName: "Pawdroid",
+        subscriptions: [
+            { protocol: "Mixed", url: "https://raw.githubusercontent.com/Pawdroid/Free-servers/refs/heads/main/static/sub_ru" }
         ]
     }
 ];
@@ -162,5 +240,6 @@ async function main() {
 }
 
 main();
+
 
 

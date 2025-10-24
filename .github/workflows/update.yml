@@ -8,34 +8,26 @@ on:
 jobs:
   update-data:
     runs-on: ubuntu-latest
-
-    # --- ВОТ ЭТО НУЖНО ДОБАВИТЬ ---
     permissions:
       contents: write
-    # ---------------------------------
-
     steps:
-      # 1. Скачиваем код из репозитория
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Устанавливаем Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # 3. Устанавливаем зависимости (axios)
       - name: Install dependencies
         run: npm install
 
-      # 4. Запускаем наш скрипт обновления
       - name: Run update script
+        # Для Next.js проекта мы создали специальный скрипт в package.json
         run: npm run update-data
 
-      # 5. Сохраняем изменения (новый data.json) в репозиторий
       - name: Commit and push if changed
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Автоматическое обновление данных о подписках"
-          file_pattern: "data.json"
+          file_pattern: "public/data.json" # <-- ИСПРАВЛЕННЫЙ ПУТЬ

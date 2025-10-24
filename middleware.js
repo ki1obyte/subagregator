@@ -1,6 +1,6 @@
 export const config = {
   matcher: '/',
-};
+}; 
 
 export function middleware(req) {
   const basicAuth = req.headers.get('authorization');
@@ -28,4 +28,5 @@ export function middleware(req) {
     },
   });
 } 
+
 

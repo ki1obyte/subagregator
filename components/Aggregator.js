@@ -1,6 +1,7 @@
 // components/Aggregator.js
 import { useEffect, useState } from 'react';
 
+// --- Вспомогательные функции ---
 const copyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
 const qrIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20px" height="20px"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 21h8v-8h-8v8zm2-6h4v4h-4v-4z"/></svg>`;
 
@@ -24,6 +25,7 @@ const showQrModal = (url) => {
     }
 };
 
+// --- Компонент Карточки ---
 function SubscriptionCard({ group }) {
     const formattedDate = new Date(group.date).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit' });
 
@@ -55,9 +57,11 @@ function SubscriptionCard({ group }) {
     );
 }
 
+// --- Главный компонент Агрегатора ---
 export default function Aggregator() {
     const [groups, setGroups] = useState([]);
     const [sortBy, setSortBy] = useState('date');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const qrModal = document.getElementById('qrModal');
@@ -74,6 +78,8 @@ export default function Aggregator() {
                 setGroups(data);
             } catch (error) {
                 console.error("Не удалось загрузить данные о подписках:", error);
+            } finally {
+                setLoading(false);
             }
         }
         loadSubscriptions();
@@ -103,10 +109,10 @@ export default function Aggregator() {
             </div>
             
             <div className="grid-container">
-                {sortedGroups.length > 0 ? (
-                    sortedGroups.map((group, index) => <SubscriptionCard group={group} key={index} />)
-                ) : (
+                {loading ? (
                     <p style={{ textAlign: 'center', gridColumn: '1 / -1' }}>Загрузка данных...</p>
+                ) : (
+                    sortedGroups.map((group, index) => <SubscriptionCard group={group} key={index} />)
                 )}
             </div>
               

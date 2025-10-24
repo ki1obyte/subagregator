@@ -48,12 +48,6 @@ const SOURCES = [
         ]
     },
     {
-        groupName: "LalatinaHub",
-        subscriptions: [
-            { protocol: "Mixed", url: "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes" }
-        ]
-    },
-    {
         groupName: "shabane",
         subscriptions: [
             { protocol: "VLESS", url: "https://raw.githubusercontent.com/shabane/kamaji/master/hub/vless.txt" },
@@ -72,42 +66,11 @@ const SOURCES = [
         ]
     },
     {
-        groupName: "istanbulsydneyhotel",
-        subscriptions: [
-            { protocol: "Mixed", url: "https://istanbulsydneyhotel.com/blogs/site/sni.php" }
-        ]
-    },
-    {
-        groupName: "acymz",
-        subscriptions: [
-            { protocol: "Mixed", url: "https://raw.githubusercontent.com/acymz/AutoVPN/refs/heads/main/data/V2.txt" }
-        ]
-    },
-    // ПРЕДУПРЕЖДЕНИЕ: Этот источник защищен Cloudflare и, скорее всего, не будет работать.
-    {
-        groupName: "shadowmere.xyz",
-        subscriptions: [
-            { protocol: "Mixed", url: "https://shadowmere.xyz/api/b64sub/" }
-        ]
-    },
-    {
-        groupName: "AzadNetCH",
-        subscriptions: [
-            { protocol: "Mixed", url: "https://raw.githubusercontent.com/AzadNetCH/Clash/main/AzadNet.txt" }
-        ]
-    },
-    {
         groupName: "wuqb2i4f",
         subscriptions: [
             { protocol: "Trojan", url: "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/refs/heads/main/output/base64/mix-protocol-tr" },
             { protocol: "VLESS", url: "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/refs/heads/main/output/base64/mix-protocol-vl" },
             { protocol: "VMess", url: "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/refs/heads/main/output/base64/mix-protocol-vm" }
-        ]
-    },
-    {
-        groupName: "liketolivefree",
-        subscriptions: [
-            { protocol: "Mixed", url: "https://raw.githubusercontent.com/liketolivefree/kobabi/refs/heads/main/sub_all.txt" }
         ]
     },
     {
@@ -117,12 +80,6 @@ const SOURCES = [
             { protocol: "Trojan", url: "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/splitted/trojan.txt" },
             { protocol: "SSR", url: "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/splitted/ssr.txt" },
             { protocol: "Shadowsocks", url: "https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/sub/splitted/ss.txt" }
-        ]
-    },
-    {
-        groupName: "STR97",
-        subscriptions: [
-            { protocol: "Mixed", url: "https://raw.githubusercontent.com/STR97/STRUGOV/refs/heads/main/STR.BYPASS" }
         ]
     },
     {
@@ -144,28 +101,21 @@ const SOURCES = [
             { protocol: "VMess", url: "https://raw.githubusercontent.com/ssrsub/ssr/refs/heads/master/vmess.txt" }
         ]
     },
+    // --- ОБЪЕДИНЕННАЯ ГРУППА MIXED ---
     {
-        groupName: "aiboboxx",
+        groupName: "group-mixed",
         subscriptions: [
-            { protocol: "Mixed", url: "https://raw.githubusercontent.com/free-nodes/v2rayfree/refs/heads/main/v2" }
-        ]
-    },
-    {
-        groupName: "mehran1404",
-        subscriptions: [
-            { protocol: "Mixed", url: "https://raw.githubusercontent.com/mehran1404/Sub_Link/refs/heads/main/V2RAY-Sub.txt" }
-        ]
-    },
-    {
-        groupName: "Kwinshadow",
-        subscriptions: [
-            { protocol: "Mixed", url: "https://raw.githubusercontent.com/Kwinshadow/TelegramV2rayCollector/main/sublinks/mix.txt" }
-        ]
-    },
-    {
-        groupName: "Pawdroid",
-        subscriptions: [
-            { protocol: "Mixed", url: "https://raw.githubusercontent.com/Pawdroid/Free-servers/refs/heads/main/static/sub_ru" }
+            { protocol: "LalatinaHub", url: "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes" },
+            { protocol: "istanbulsydneyhotel", url: "https://istanbulsydneyhotel.com/blogs/site/sni.php" },
+            { protocol: "acymz", url: "https://raw.githubusercontent.com/acymz/AutoVPN/refs/heads/main/data/V2.txt" },
+            { protocol: "shadowmere.xyz", url: "https://shadowmere.xyz/api/b64sub/" },
+            { protocol: "AzadNetCH", url: "https://raw.githubusercontent.com/AzadNetCH/Clash/main/AzadNet.txt" },
+            { protocol: "liketolivefree", url: "https://raw.githubusercontent.com/liketolivefree/kobabi/refs/heads/main/sub_all.txt" },
+            { protocol: "STR97", url: "https://raw.githubusercontent.com/STR97/STRUGOV/refs/heads/main/STR.BYPASS" },
+            { protocol: "aiboboxx", url: "https://raw.githubusercontent.com/free-nodes/v2rayfree/refs/heads/main/v2" },
+            { protocol: "mehran1404", url: "https://raw.githubusercontent.com/mehran1404/Sub_Link/refs/heads/main/V2RAY-Sub.txt" },
+            { protocol: "Kwinshadow", url: "https://raw.githubusercontent.com/Kwinshadow/TelegramV2rayCollector/main/sublinks/mix.txt" },
+            { protocol: "Pawdroid", url: "https://raw.githubusercontent.com/Pawdroid/Free-servers/refs/heads/main/static/sub_ru" }
         ]
     }
 ];
@@ -240,6 +190,7 @@ async function main() {
 }
 
 main();
+
 
 
 

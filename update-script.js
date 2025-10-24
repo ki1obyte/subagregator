@@ -107,7 +107,7 @@ async function main() {
 
                 let serverCount = 0;
                 const lines = rawContent.trim().split(/\r?\n/);
-                const regex = /(vless:\/\/|vmess:\/\/|ss:\/\/|ssr:\/\/|trojan:\/\/)/g;
+                const regex = /(vless:\/\/|vmess:\/\/|ss:\/\/|ssr:\/\/|trojan:\/\/|hy2:\/\/|hysteria2:\/\/)/g;
 
                 for (const line of lines) {
                     const trimmedLine = line.trim();
@@ -162,4 +162,5 @@ async function main() {
 }
 
 main();
+
 

@@ -1,9 +1,9 @@
 // pages/index.js
-import Head from 'next/head';
+import Head from 'next/head'; // <--- ВОТ ЭТА СТРОКА БЫЛА ПРОПУЩЕНА
 import dynamic from 'next/dynamic';
 
-// Динамически импортируем наш основной компонент с ОТКЛЮЧЕННЫМ серверным рендерингом (SSR)
-const AggregatorComponent = dynamic(() => import('./components/Aggregator'), {
+// Путь теперь ведет в корневую папку components
+const AggregatorComponent = dynamic(() => import('../components/Aggregator'), {
   ssr: false, 
 });
 

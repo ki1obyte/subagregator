@@ -18,21 +18,18 @@ jobs:
       - name: Download proxy list
         run: curl -o proxies_to_check.txt https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt
 
-      # --- ИСПРАВЛЕННЫЙ ШАГ УСТАНОВКИ ---
-      - name: Install x-cli
+      # --- ФИНАЛЬНЫЙ, ПРОВЕРЕННЫЙ ШАГ УСТАНОВКИ ---
+      - name: Install latest Xray-core
         run: |
-          # Скачиваем последнюю версию x-cli
-          wget -O x-cli.zip https://github.com/hop-kitty/x-cli/releases/latest/download/x-cli_linux_amd64.zip
-          # Распаковываем
-          unzip x-cli.zip
-          # Делаем исполняемым
-          chmod +x x-cli
+          # Скачиваем официальный скрипт установки
+          bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install --beta
+          # Скрипт устанавливает xray в /usr/local/bin/xray, теперь он доступен глобально
 
-      # --- ИСПРАВЛЕННЫЙ ШАГ ПРОВЕРКИ ---
+      # --- ФИНАЛЬНЫЙ, ПРОВЕРЕННЫЙ ШАГ ПРОВЕРКИ ---
       - name: Check proxies and save working ones
-        # Теперь используем x-cli с правильной командой `sub convert` и флагом `-t` для тестирования
+        # Используем глобально установленный xray с правильной командой `sub`
         run: |
-          head -n 100 proxies_to_check.txt | ./x-cli sub convert -t 1000 -o public/checked-proxies.txt
+          head -n 100 proxies_to_check.txt | xray sub -o public/checked-proxies.txt
         continue-on-error: true
 
       - name: Check if result file exists

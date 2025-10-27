@@ -1,4 +1,4 @@
-# check_proxies.py (revised version with Xray support for REALITY and XTLS)
+# check_proxies.py (revised version with spiderX support and debugging)
 
 import requests
 import subprocess
@@ -40,6 +40,7 @@ def parse_vless(vless_url):
             'fp': params.get('fp', [''])[0],  # Fingerprint for uTLS
             'pbk': params.get('pbk', [''])[0],  # Public key for REALITY
             'sid': params.get('sid', [''])[0],  # Short ID for REALITY
+            'spx': params.get('spx', [''])[0],  # SpiderX for REALITY
             'ws_path': params.get('path', ['/'])[0],
             'ws_host': params.get('host', [''])[0],
             'grpc_serviceName': params.get('serviceName', [''])[0],
@@ -86,7 +87,7 @@ def check_proxy(vless_url, parsed):
                 "serverName": parsed['sni'],
                 "publicKey": parsed['pbk'],
                 "shortId": parsed['sid'],
-                "spiderX": "/"
+                "spiderX": parsed['spx']  # Use parsed spx, default empty string
             }
         else:
             stream_settings["tlsSettings"] = tls_settings
@@ -105,7 +106,7 @@ def check_proxy(vless_url, parsed):
                        "streamSettings": stream_settings}]
     }
     
-    max_retries = 3
+    max_retries = 10
     retry_delay = 5
     
     for attempt in range(max_retries):
@@ -121,7 +122,7 @@ def check_proxy(vless_url, parsed):
             if not xray_path: return False
                 
             proc = subprocess.Popen([xray_path, 'run', '-c', config_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            time.sleep(3) 
+            time.sleep(5)  # Increased for stability
 
             if proc.poll() is not None:
                 stdout, stderr = proc.communicate()
@@ -132,24 +133,33 @@ def check_proxy(vless_url, parsed):
             socket.socket = socks.socksocket
             
             start_time = time.time()
-            response = requests.get('http://httpbin.org/ip', timeout=20)
+            response = requests.get('http://httpbin.org/ip', timeout=30)  # Increased timeout
             end_time = time.time()
 
             if response.status_code == 200:
                 print(f"SUCCESS: Proxy is working. Response time: {end_time - start_time:.2f}s")
                 return True
-        
+            else:
+                print(f"FAILURE on attempt {attempt + 1}: Proxy responded with status code {response.status_code}")
+
         except Exception as e:
             print(f"FAILURE on attempt {attempt + 1}: An error occurred: {e}")
             
         finally:
-            if proc and proc.poll() is None:
-                proc.terminate()
-                try: proc.wait(timeout=5)
-                except subprocess.TimeoutExpired: proc.kill()
+            if proc:
+                if proc.poll() is None:
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        proc.kill()
+                stdout, stderr = proc.communicate()
+                if stderr:
+                    print(f"Xray stderr: {stderr.strip()}")
             if os.path.exists(config_path):
                 os.unlink(config_path)
             socks.set_default_proxy()
+            time.sleep(1)  # Brief pause to ensure cleanup
         
         if attempt < max_retries - 1:
             print(f"Waiting for {retry_delay} seconds before retrying...")

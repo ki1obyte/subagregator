@@ -1,4 +1,4 @@
-# check_proxies.py (финальная версия с поддержкой REALITY)
+# check_proxies.py (финальная версия с исправленным IP и поддержкой REALITY)
 
 import requests
 import subprocess
@@ -35,11 +35,11 @@ def parse_vless(vless_url):
             'port': int(port_str),
             'network': params.get('type', ['tcp'])[0],
             'security': params.get('security', ['none'])[0],
+            'flow': params.get('flow', [''])[0],
             'sni': params.get('sni', [params.get('host', [''])[0]])[0] or host,
             'ws_path': params.get('path', ['/'])[0],
             'ws_host': params.get('host', [''])[0],
             'grpc_serviceName': params.get('serviceName', [''])[0],
-            # --- НОВОЕ: Параметры для REALITY ---
             'reality_fp': params.get('fp', [''])[0],
             'reality_pbk': params.get('pbk', [''])[0],
             'reality_sid': params.get('sid', [''])[0],
@@ -50,7 +50,6 @@ def parse_vless(vless_url):
         return None
 
 def setup_v2ray():
-    # Эта функция остается без изменений
     if not os.path.exists('v2ray'):
         print("V2Ray not found, downloading...")
         url = 'https://github.com/v2fly/v2ray-core/releases/latest/download/v2ray-linux-64.zip'
@@ -70,31 +69,28 @@ def check_proxy(vless_url, parsed):
     if not parsed:
         return False
 
-    # Добавляем тип безопасности в лог для лучшей диагностики
     print(f"\n--- Checking proxy: {parsed.get('remark') or parsed.get('address')} ({parsed.get('network')}/{parsed.get('security')}) ---")
     
-    # --- НОВОЕ: Динамическая генерация streamSettings для TLS и REALITY ---
     stream_settings = {"network": parsed['network'], "security": parsed['security']}
     if parsed['security'] == 'tls':
         stream_settings["tlsSettings"] = {"serverName": parsed['sni']}
     elif parsed['security'] == 'reality':
-        stream_settings["realitySettings"] = {
-            "serverName": parsed['sni'],
-            "fingerprint": parsed['reality_fp'],
-            "publicKey": parsed['reality_pbk'],
-            "shortId": parsed['reality_sid']
-        }
+        stream_settings["realitySettings"] = {"serverName": parsed['sni'], "fingerprint": parsed['reality_fp'], "publicKey": parsed['reality_pbk'], "shortId": parsed['reality_sid']}
         
-    # Добавляем настройки для ws и grpc как и раньше
     if parsed['network'] == 'ws':
         stream_settings["wsSettings"] = {"path": parsed['ws_path'], "headers": {"Host": parsed['ws_host']}}
     if parsed['network'] == 'grpc':
         stream_settings["grpcSettings"] = {"serviceName": parsed['grpc_serviceName']}
 
+    user_settings = {"id": parsed['id'], "encryption": "none"}
+    if parsed.get('flow'):
+        user_settings['flow'] = parsed['flow']
+
+    # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
     config = {
         "log": {"loglevel": "warning"},
-        "inbounds": [{"port": 10808, "listen": "12227.0.0.1", "protocol": "socks"}],
-        "outbounds": [{"protocol": "vless", "settings": {"vnext": [{"address": parsed['address'], "port": parsed['port'], "users": [{"id": parsed['id'], "encryption": "none", "flow": "xtls-rprx-vision"}]}]}, "streamSettings": stream_settings}]
+        "inbounds": [{"port": 10808, "listen": "127.0.0.1", "protocol": "socks"}],
+        "outbounds": [{"protocol": "vless", "settings": {"vnext": [{"address": parsed['address'], "port": parsed['port'], "users": [user_settings]}]}, "streamSettings": stream_settings}]
     }
     
     max_retries = 3
@@ -151,7 +147,7 @@ def check_proxy(vless_url, parsed):
     print("All attempts failed for this proxy.")
     return False
 
-# Основная логика (остается без изменений)
+# Основная логика
 url = "https://raw.githubusercontent.com/ki1obyte/325234657545/refs/heads/main/test.txt"
 proxies = fetch_proxies(url, 100)
 working = []

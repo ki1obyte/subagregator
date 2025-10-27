@@ -95,14 +95,16 @@ jobs:
       - name: Download all result batches
         uses: actions/download-artifact@v4
         with:
-          # Скачиваем все артефакты, созданные на предыдущем шаге
           pattern: results-batch-*
           path: results
+          # Эта опция теперь не так важна, но пусть будет
+          merge-multiple: true 
 
       - name: Combine results and push to target repo
         run: |
-          # Объединяем все скачанные файлы с результатами в один
-          cat results/*.txt > final_results.txt || true
+          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+          # Ищем файлы *.txt во всех поддиректориях `results`
+          cat results/**/*.txt > final_results.txt || true
           
           echo "Total working REALITY proxies found: $(wc -l < final_results.txt)"
           
@@ -117,7 +119,8 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "$(date +'%Y-%m-%d %H:%M')"
+            # Вернул осмысленное сообщение коммита
+            git commit -m "Updated working REALITY proxies (Parallel): $(date +'%Y-%м-%d %H:%M')"
             git push
           fi
         env:

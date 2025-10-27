@@ -9,11 +9,9 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      # Шаг 1: Скачивание репозитория
-      - name: Check out repository
+      # Шаг 1: Скачивание репозитория, где лежит скрипт
+      - name: Check out current repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_TOKEN }}
 
       # Шаг 2: Настройка Python
       - name: Set up Python
@@ -21,43 +19,54 @@ jobs:
         with:
           python-version: '3.12'
           
-      # --- НОВЫЙ ШАГ: Автоматическое определение последней версии Xray ---
+      # Шаг 3: Автоматическое определение последней версии Xray
       - name: Get latest Xray version
         id: get_xray_version
         run: |
-          # Используем API GitHub, чтобы получить тег последнего релиза и записать его в переменную окружения
           echo "XRAY_VERSION=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest | jq -r .tag_name)" >> $GITHUB_ENV
       
-      # Шаг 3: Кэширование бинарного файла Xray с динамическим ключом
+      # Шаг 4: Кэширование бинарного файла Xray
       - name: Cache Xray binary
         id: cache-xray
         uses: actions/cache@v4
         with:
           path: xray
-          # Ключ теперь использует переменную, полученную на предыдущем шаге.
-          # Кэш будет автоматически обновляться при выходе новой версии Xray.
           key: ${{ runner.os }}-xray-core-${{ env.XRAY_VERSION }}
 
-      # Шаг 4: Установка зависимостей
+      # Шаг 5: Установка зависимостей
       - name: Install dependencies
         run: |
           sudo apt-get update && sudo apt-get install -y unzip
           pip install requests PySocks
 
-      # Шаг 5: Запуск скрипта проверки
+      # Шаг 6: Запуск скрипта проверки
+      # Он создаст файл test.txt в текущей директории
       - name: Run proxy check
         run: python check_proxies.py
 
-      # Шаг 6: Коммит и отправка изменений
-      - name: Commit and push changes
+      # --- ОБНОВЛЕННЫЙ ШАГ 7: Коммит и отправка в ДРУГОЙ репозиторий ---
+      - name: Commit and push to target repository
         run: |
+          # Клонируем целевой репозиторий в новую папку 'target_repo'
+          # Используем токен для аутентификации
+          git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/ki1obyte/325234657545.git target_repo
+          
+          # Перемещаем наш сгенерированный файл в клонированный репозиторий
+          mv test.txt target_repo/test.txt
+          
+          # Переходим в директорию целевого репозитория
+          cd target_repo
+          
+          # Настраиваем Git
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git pull origin main
-          git add working_vless.txt
+          
+          # Добавляем файл и проверяем, есть ли изменения
+          git add test.txt
           if git diff --staged --quiet; then
-            echo "No changes to commit in working_vless.txt"
+            echo "No changes to commit."
           else
+            # Если изменения есть, делаем коммит и пуш
             git commit -m "Updated working VLESS proxies: $(date +'%Y-%m-%d %H:%M')"
             git push
           fi

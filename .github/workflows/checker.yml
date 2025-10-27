@@ -18,18 +18,17 @@ jobs:
       - name: Download proxy list
         run: curl -o proxies_to_check.txt https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt
 
-      # --- ФИНАЛЬНЫЙ, ПРОВЕРЕННЫЙ ШАГ УСТАНОВКИ ---
-      - name: Install latest Xray-core
+      # --- ИСПРАВЛЕННЫЙ ШАГ УСТАНОВКИ ---
+      - name: Install latest Xray-core locally
         run: |
-          # Скачиваем официальный скрипт установки
-          bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install --beta
-          # Скрипт устанавливает xray в /usr/local/bin/xray, теперь он доступен глобально
+          # Запускаем скрипт с sudo и флагом --local для установки в текущую папку
+          sudo bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install --local
 
-      # --- ФИНАЛЬНЫЙ, ПРОВЕРЕННЫЙ ШАГ ПРОВЕРКИ ---
+      # --- ИСПРАВЛЕННЫЙ ШАГ ПРОВЕРКИ ---
       - name: Check proxies and save working ones
-        # Используем глобально установленный xray с правильной командой `sub`
+        # Так как xray теперь в текущей папке, мы вызываем его через ./xray
         run: |
-          head -n 100 proxies_to_check.txt | xray sub -o public/checked-proxies.txt
+          head -n 100 proxies_to_check.txt | ./xray sub -o public/checked-proxies.txt
         continue-on-error: true
 
       - name: Check if result file exists

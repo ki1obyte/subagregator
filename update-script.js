@@ -3,9 +3,16 @@ const axios = require('axios');
 
 const SOURCES = [
     {
+        groupName: "⭐ Проверенные",
+        subscriptions: [
+            { protocol: "working_vless", url: "https://raw.githubusercontent.com/ki1obyte/subagregator/refs/heads/main/working_vless.txt?token=GHSAT0AAAAAADJEXBILB26W3QK5GI4NXFVE2H7RU6A" },
+            { protocol: "SkySafe, Waicore", url: "https://raw.githubusercontent.com/ki1obyte/325234657545/refs/heads/main/config.txt" }
+        ]
+    },
+    {
         groupName: "F0rc3Run",
         subscriptions: [
-            { protocol: "Best-Results", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt" },
+            { protocol: "Proxies", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt" },
             { protocol: "VLESS", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt" },
             { protocol: "VMess", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vmess.txt" },
             { protocol: "Shadowsocks", url: "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/shadowsocks.txt" },
@@ -101,7 +108,6 @@ const SOURCES = [
             { protocol: "VMess", url: "https://raw.githubusercontent.com/ssrsub/ssr/refs/heads/master/vmess.txt" }
         ]
     },
-    // --- ОБЪЕДИНЕННАЯ ГРУППА MIXED ---
     {
         groupName: "group-mixed",
         subscriptions: [
@@ -190,6 +196,7 @@ async function main() {
 }
 
 main();
+
 
 
 

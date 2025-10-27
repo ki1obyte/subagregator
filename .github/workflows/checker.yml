@@ -120,7 +120,7 @@ jobs:
             echo "No changes to commit."
           else
             # Вернул осмысленное сообщение коммита
-            git commit -m "Updated working REALITY proxies (Parallel): $(date +'%Y-%м-%d %H:%M')"
+            git commit -m "$(date +'%Y-%м-%d %H:%M')"
             git push
           fi
         env:

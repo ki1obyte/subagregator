@@ -145,7 +145,7 @@ def check_proxy(vless_url, parsed):
         # Достаточно сбросить прокси
 
 # Основная логика
-url = "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt"
+url = "https://raw.githubusercontent.com/ki1obyte/325234657545/refs/heads/main/test.txt"
 proxies = fetch_proxies(url, 100)
 working = []
 
@@ -164,3 +164,4 @@ with open('working_vless.txt', 'w') as f:
 print(f"\n======================================")
 print(f"Check complete. Found {len(working)} working proxies.")
 print(f"======================================")
+

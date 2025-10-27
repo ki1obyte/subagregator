@@ -30,4 +30,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Автоматическое обновление данных о подписках"
-          file_pattern: "public/data.json" # <-- ИСПРАВЛЕННЫЙ ПУТЬ
+          file_pattern: "public/data.json"

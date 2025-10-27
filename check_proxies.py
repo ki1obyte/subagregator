@@ -1,4 +1,4 @@
-# check_proxies.py (revised version with spiderX support and debugging)
+# check_proxies.py (версия для проверки ТОЛЬКО REALITY прокси)
 
 import requests
 import subprocess
@@ -10,11 +10,12 @@ from urllib.parse import urlparse, parse_qs, unquote
 import socket
 import socks
 
-def fetch_proxies(url, num=100):
-    print(f"Fetching {num} proxies from {url}...")
+# --- ИЗМЕНЕНИЕ 1: Функция теперь скачивает ВСЕ прокси ---
+def fetch_proxies(url):
+    print(f"Fetching ALL proxies from {url}...")
     try:
-        response = requests.get(url, timeout=10)
-        lines = response.text.strip().split('\n')[:num]
+        response = requests.get(url, timeout=20) # Увеличим таймаут для больших списков
+        lines = response.text.strip().split('\n')
         print(f"Successfully fetched {len(lines)} lines.")
         return [line.strip() for line in lines if line.strip() and line.startswith('vless://')]
     except Exception as e:
@@ -37,10 +38,10 @@ def parse_vless(vless_url):
             'security': params.get('security', ['none'])[0],
             'flow': params.get('flow', [''])[0],
             'sni': params.get('sni', [params.get('host', [''])[0]])[0] or host,
-            'fp': params.get('fp', [''])[0],  # Fingerprint for uTLS
-            'pbk': params.get('pbk', [''])[0],  # Public key for REALITY
-            'sid': params.get('sid', [''])[0],  # Short ID for REALITY
-            'spx': params.get('spx', [''])[0],  # SpiderX for REALITY
+            'fp': params.get('fp', [''])[0],
+            'pbk': params.get('pbk', [''])[0],
+            'sid': params.get('sid', [''])[0],
+            'spx': params.get('spx', [''])[0],
             'ws_path': params.get('path', ['/'])[0],
             'ws_host': params.get('host', [''])[0],
             'grpc_serviceName': params.get('serviceName', [''])[0],
@@ -51,6 +52,7 @@ def parse_vless(vless_url):
         return None
 
 def setup_xray():
+    # Эта функция остается без изменений
     if not os.path.exists('xray'):
         print("Xray not found, downloading...")
         url = 'https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip'
@@ -67,6 +69,7 @@ def setup_xray():
     return './xray'
 
 def check_proxy(vless_url, parsed):
+    # Эта функция остается без изменений
     if not parsed:
         return False
 
@@ -79,7 +82,7 @@ def check_proxy(vless_url, parsed):
         if parsed['fp']:
             tls_settings["utls"] = {"enabled": True, "fingerprint": parsed['fp']}
         
-        if parsed['security'] == 'reality' or parsed['pbk']:  # Handle REALITY even if security=tls
+        if parsed['security'] == 'reality' or parsed['pbk']:
             stream_settings["security"] = "reality"
             stream_settings["realitySettings"] = {
                 "show": False,
@@ -87,7 +90,7 @@ def check_proxy(vless_url, parsed):
                 "serverName": parsed['sni'],
                 "publicKey": parsed['pbk'],
                 "shortId": parsed['sid'],
-                "spiderX": parsed['spx']  # Use parsed spx, default empty string
+                "spiderX": parsed['spx']
             }
         else:
             stream_settings["tlsSettings"] = tls_settings
@@ -122,7 +125,7 @@ def check_proxy(vless_url, parsed):
             if not xray_path: return False
                 
             proc = subprocess.Popen([xray_path, 'run', '-c', config_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            time.sleep(5)  # Increased for stability
+            time.sleep(5)
 
             if proc.poll() is not None:
                 stdout, stderr = proc.communicate()
@@ -133,7 +136,7 @@ def check_proxy(vless_url, parsed):
             socket.socket = socks.socksocket
             
             start_time = time.time()
-            response = requests.get('http://httpbin.org/ip', timeout=30)  # Increased timeout
+            response = requests.get('http://httpbin.org/ip', timeout=30)
             end_time = time.time()
 
             if response.status_code == 200:
@@ -159,7 +162,7 @@ def check_proxy(vless_url, parsed):
             if os.path.exists(config_path):
                 os.unlink(config_path)
             socks.set_default_proxy()
-            time.sleep(1)  # Brief pause to ensure cleanup
+            time.sleep(1)
         
         if attempt < max_retries - 1:
             print(f"Waiting for {retry_delay} seconds before retrying...")
@@ -168,17 +171,33 @@ def check_proxy(vless_url, parsed):
     print("All attempts failed for this proxy.")
     return False
 
+# --- ИЗМЕНЕНИЕ 2: Полностью переписанная основная логика ---
 # Main logic
 url = "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt"
-proxies = fetch_proxies(url, 150)
+all_proxies = fetch_proxies(url)
 working = []
+reality_proxies_to_check = []
 
-for i, proxy_url in enumerate(proxies):
-    print(f"\n======== Processing proxy {i+1}/{len(proxies)} ========")
+print(f"\nFound {len(all_proxies)} total VLESS proxies. Filtering for REALITY configurations...")
+
+# Этап 1: Отфильтровываем только REALITY прокси
+for proxy_url in all_proxies:
+    parsed_proxy = parse_vless(proxy_url)
+    # Главный признак REALITY - наличие 'pbk' или явное указание 'security=reality'
+    if parsed_proxy and (parsed_proxy.get('pbk') or parsed_proxy.get('security') == 'reality'):
+        reality_proxies_to_check.append(proxy_url)
+
+print(f"Found {len(reality_proxies_to_check)} REALITY proxies. Starting checks...")
+
+# Этап 2: Проверяем только отфильтрованные REALITY прокси
+for i, proxy_url in enumerate(reality_proxies_to_check):
+    print(f"\n======== Processing REALITY proxy {i+1}/{len(reality_proxies_to_check)} ========")
+    # Перепарсиваем, чтобы получить чистый словарь для функции проверки
     parsed = parse_vless(proxy_url)
     if parsed and check_proxy(proxy_url, parsed):
         working.append(proxy_url)
 
+# Этап 3: Записываем рабочие в файл
 with open('test.txt', 'w') as f:
     if working:
         f.write('\n'.join(working) + '\n')
@@ -186,10 +205,5 @@ with open('test.txt', 'w') as f:
         f.write('')
 
 print(f"\n======================================")
-print(f"Check complete. Found {len(working)} working proxies.")
+print(f"Check complete. Found {len(working)} working REALITY proxies.")
 print(f"======================================")
-
-
-
-
-

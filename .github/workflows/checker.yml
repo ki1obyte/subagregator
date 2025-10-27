@@ -1,31 +1,68 @@
-name: Check VLESS Proxies
+name: Check VLESS Proxies (Parallel)
 
 on:
   schedule:
-    - cron: '0 */12 * * *'
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
+  # --- ЗАДАНИЕ 1: ПОДГОТОВКА ---
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      # Передаем количество созданных частей в другие задания
+      num_jobs: ${{ steps.split.outputs.num_jobs }}
+    steps:
+      - name: Fetch and split proxies
+        id: split
+        run: |
+          # Скачиваем полный список прокси
+          curl -s https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/main/splitted-by-protocol/vless.txt -o all_proxies.txt
+          
+          # Определяем количество параллельных заданий
+          NUM_JOBS=4
+          
+          # Разделяем файл на N частей
+          split -d -n l/$NUM_JOBS all_proxies.txt proxies_
+          
+          # Переименовываем файлы для удобства
+          for file in proxies_*; do
+            mv "$file" "$file.txt"
+          done
+          
+          # Записываем количество частей в output
+          echo "num_jobs=$NUM_JOBS" >> $GITHUB_OUTPUT
+
+      - name: Upload proxy chunks
+        uses: actions/upload-artifact@v4
+        with:
+          name: proxy-chunks
+          path: proxies_*.txt
+
+  # --- ЗАДАНИЕ 2: ПАРАЛЛЕЛЬНАЯ ПРОВЕРКА ---
   check:
     runs-on: ubuntu-latest
+    # Запускается после подготовки
+    needs: prepare
+    # Создает матрицу из N заданий (0, 1, 2, 3)
+    strategy:
+      matrix:
+        # Создаем массив чисел от 0 до (N-1)
+        job_index: ${{ fromJson(format('[{0}]', join(range(0, needs.prepare.outputs.num_jobs), ','))) }}
+
     steps:
-      # Шаг 1: Скачивание репозитория, где лежит скрипт
-      - name: Check out current repository
+      - name: Check out repository
         uses: actions/checkout@v4
 
-      # Шаг 2: Настройка Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          
-      # Шаг 3: Автоматическое определение последней версии Xray
+
       - name: Get latest Xray version
         id: get_xray_version
-        run: |
-          echo "XRAY_VERSION=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest | jq -r .tag_name)" >> $GITHUB_ENV
+        run: echo "XRAY_VERSION=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest | jq -r .tag_name)" >> $GITHUB_ENV
       
-      # Шаг 4: Кэширование бинарного файла Xray
       - name: Cache Xray binary
         id: cache-xray
         uses: actions/cache@v4
@@ -33,40 +70,58 @@ jobs:
           path: xray
           key: ${{ runner.os }}-xray-core-${{ env.XRAY_VERSION }}
 
-      # Шаг 5: Установка зависимостей
       - name: Install dependencies
-        run: |
-          sudo apt-get update && sudo apt-get install -y unzip
-          pip install requests PySocks
+        run: pip install requests PySocks
 
-      # Шаг 6: Запуск скрипта проверки
-      # Он создаст файл test.txt в текущей директории
-      - name: Run proxy check
-        run: python check_proxies.py
+      - name: Download specific proxy chunk
+        uses: actions/download-artifact@v4
+        with:
+          name: proxy-chunks
+      
+      - name: Run proxy check on chunk
+        run: python check_proxies.py proxies_${{ matrix.job_index }}.txt
 
-      # --- ОБНОВЛЕННЫЙ ШАГ 7: Коммит и отправка в ДРУГОЙ репозиторий ---
-      - name: Commit and push to target repository
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-batch-${{ matrix.job_index }}
+          path: test.txt
+
+  # --- ЗАДАНИЕ 3: СБОРКА РЕЗУЛЬТАТОВ И ПУШ ---
+  collect:
+    runs-on: ubuntu-latest
+    # Запускается после завершения ВСЕХ параллельных проверок
+    needs: check
+    steps:
+      - name: Download all result batches
+        uses: actions/download-artifact@v4
+        with:
+          # Скачиваем все артефакты с результатами
+          pattern: results-batch-*
+          path: results
+          merge-multiple: true # Складываем все в одну папку
+
+      - name: Combine results and push to target repo
         run: |
-          # Клонируем целевой репозиторий в новую папку 'target_repo'
-          # Используем токен для аутентификации
+          # Объединяем все файлы с результатами в один test.txt
+          cat results/*.txt > final_results.txt
+          
+          echo "Total working proxies found: $(wc -l < final_results.txt)"
+          
+          # Клонируем целевой репозиторий
           git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/ki1obyte/325234657545.git target_repo
           
-          # Перемещаем наш сгенерированный файл в клонированный репозиторий
-          mv test.txt target_repo/test.txt
+          # Перемещаем финальный файл
+          mv final_results.txt target_repo/test.txt
           
-          # Переходим в директорию целевого репозитория
+          # Переходим, коммитим и пушим
           cd target_repo
-          
-          # Настраиваем Git
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          
-          # Добавляем файл и проверяем, есть ли изменения
           git add test.txt
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            # Если изменения есть, делаем коммит и пуш
             git commit -m "$(date +'%Y-%m-%d %H:%M')"
             git push
           fi

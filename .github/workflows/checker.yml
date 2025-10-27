@@ -1,62 +1,60 @@
 name: Check VLESS Proxies
 
 on:
-  # Запускает рабочий процесс каждые 6 часов
   schedule:
     - cron: '0 */6 * * *'
-  # Позволяет запускать этот рабочий процесс вручную со вкладки Actions
   workflow_dispatch:
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-    # Шаг 1: Скачивание (checkout) вашего репозитория
-    - name: Check out repository
-      uses: actions/checkout@v4
-      with:
-        # Используем токен с правами на запись для отправки изменений
-        token: ${{ secrets.GH_TOKEN }}
+      # Шаг 1: Скачивание репозитория
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
 
-    # Шаг 2: Настройка Python
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
+      # Шаг 2: Настройка Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          
+      # --- НОВЫЙ ШАГ: Кэширование V2Ray ---
+      # Этот шаг будет искать v2ray в кэше и восстанавливать его, если он был сохранен ранее.
+      - name: Cache V2Ray binary
+        id: cache-v2ray
+        uses: actions/cache@v4
+        with:
+          # Указываем, какой файл или папку нужно кэшировать
+          path: v2ray
+          # Создаем уникальный ключ для кэша. Если ключ совпадает, кэш восстанавливается.
+          key: ${{ runner.os }}-v2ray-v5.15.0 # Рекомендуется добавлять версию, чтобы кэш обновлялся при смене версии v2ray
 
-    # Шаг 3: Установка зависимостей, необходимых для скрипта
-    - name: Install dependencies
-      run: |
-        sudo apt-get update && sudo apt-get install -y unzip
-        pip install requests PySocks
+      # Шаг 3: Установка зависимостей
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y unzip
+          pip install requests PySocks
 
-    # Шаг 4: Запуск основного скрипта проверки прокси
-    - name: Run proxy check
-      run: python check_proxies.py
+      # Шаг 4: Запуск скрипта проверки
+      # Теперь скрипт будет находить v2ray в кэше (если он есть) и не будет его скачивать
+      - name: Run proxy check
+        run: python check_proxies.py
 
-    # Шаг 5: Коммит и отправка изменений в репозиторий
-    - name: Commit and push changes
-      run: |
-        # Настраиваем Git с именем и email'ом пользователя-бота
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        
-        # --- ИСПРАВЛЕНИЕ: ---
-        # Сначала забираем последние изменения из удаленного репозитория.
-        # Это предотвращает ошибки, если кто-то сделал коммит, пока Action работал.
-        git pull origin main
-        
-        # Добавляем измененный файл в индекс для коммита
-        git add working_vless.txt
-        
-        # Проверяем, были ли какие-либо изменения в файле.
-        # Если изменений нет, ничего не делаем.
-        if git diff --staged --quiet; then
-          echo "No changes to commit in working_vless.txt"
-        else
-          # Если изменения есть, создаем коммит и отправляем его в репозиторий.
-          git commit -m "Updated working VLESS proxies: $(date +'%Y-%m-%d %H:%M')"
-          git push
-        fi
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      # Шаг 5: Коммит и отправка изменений
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git pull origin main
+          git add working_vless.txt
+          if git diff --staged --quiet; then
+            echo "No changes to commit in working_vless.txt"
+          else
+            git commit -m "Updated working VLESS proxies: $(date +'%Y-%m-%d %H:%M')"
+            git push
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}

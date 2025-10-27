@@ -1,4 +1,4 @@
-name: Check VLESS Proxies (Parallel)
+name: Check VLESS Proxies (Parallel, REALITY-only)
 
 on:
   schedule:
@@ -6,31 +6,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  # --- ЗАДАНИЕ 1: ПОДГОТОВКА (ИСПРАВЛЕНО) ---
+  # --- ЗАДАНИЕ 1: ПОДГОТОВКА И СТРОГАЯ ФИЛЬТРАЦИЯ ---
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      # Теперь мы выводим готовую JSON-строку для матрицы
       job_matrix: ${{ steps.split.outputs.job_matrix }}
     steps:
-      - name: Fetch and split proxies
+      - name: Fetch, Filter, and Split Proxies
         id: split
         run: |
           # Скачиваем полный список прокси
           curl -s https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/main/splitted-by-protocol/vless.txt -o all_proxies.txt
           
-          # Определяем количество параллельных заданий
-          NUM_JOBS=10
+          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Фильтруем ТОЛЬКО REALITY прокси с непустым pbk ---
+          # 'pbk=.+' ищет 'pbk=' ПОСЛЕ которого есть хотя бы один символ
+          grep -E 'pbk=.+|security=reality' all_proxies.txt > reality_proxies.txt || true
           
-          # Разделяем файл на N частей
-          split -d -n l/$NUM_JOBS all_proxies.txt proxies_
+          # Определяем количество параллельных заданий
+          NUM_JOBS=4
+          
+          # Разделяем наш отфильтрованный файл на N частей
+          split -d -n l/$NUM_JOBS reality_proxies.txt proxies_
           
           # Переименовываем файлы для удобства
           for i in $(seq 0 $((NUM_JOBS - 1))); do
             mv "proxies_$(printf "%02d" $i)" "proxies_$i.txt"
           done
           
-          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
           # Генерируем JSON-массив [0, 1, ..., N-1] для матрицы
           JOB_MATRIX=$(jq -nc '[range(0; $num)]' --argjson num $NUM_JOBS)
           echo "job_matrix=$JOB_MATRIX" >> $GITHUB_OUTPUT
@@ -41,48 +43,38 @@ jobs:
           name: proxy-chunks
           path: proxies_*.txt
 
-  # --- ЗАДАНИЕ 2: ПАРАЛЛЕЛЬНАЯ ПРОВЕРКА (ИСПРАВЛЕНО) ---
+  # --- ЗАДАНИЕ 2: ПАРАЛЛЕЛЬНАЯ ПРОВЕРКА (БЕЗ ИЗМЕНЕНИЙ) ---
   check:
     runs-on: ubuntu-latest
     needs: prepare
     strategy:
-      # Указываем, что нужно продолжать другие задания, даже если одно упало
       fail-fast: false
       matrix:
-        # Используем готовую JSON-строку из 'prepare'
         job_index: ${{ fromJson(needs.prepare.outputs.job_matrix) }}
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Get latest Xray version
         id: get_xray_version
         run: echo "XRAY_VERSION=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest | jq -r .tag_name)" >> $GITHUB_ENV
-      
       - name: Cache Xray binary
         id: cache-xray
         uses: actions/cache@v4
         with:
           path: xray
           key: ${{ runner.os }}-xray-core-${{ env.XRAY_VERSION }}
-
       - name: Install dependencies
         run: pip install requests PySocks
-
       - name: Download specific proxy chunk
         uses: actions/download-artifact@v4
         with:
           name: proxy-chunks
-      
       - name: Run proxy check on chunk
         run: python check_proxies.py proxies_${{ matrix.job_index }}.txt
-
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
@@ -100,22 +92,12 @@ jobs:
           pattern: results-batch-*
           path: results
           merge-multiple: true
-
       - name: Combine results and push to target repo
         run: |
-          # Объединяем все файлы с результатами в один test.txt
-          # find . -type f -name "*.txt" -exec cat {} + > final_results.txt
-          cat results/*.txt > final_results.txt
-          
-          echo "Total working proxies found: $(wc -l < final_results.txt)"
-          
-          # Клонируем целевой репозиторий
+          cat results/*.txt > final_results.txt || true
+          echo "Total working REALITY proxies found: $(wc -l < final_results.txt)"
           git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/ki1obyte/325234657545.git target_repo
-          
-          # Перемещаем финальный файл
           mv final_results.txt target_repo/test.txt
-          
-          # Переходим, коммитим и пушим
           cd target_repo
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"

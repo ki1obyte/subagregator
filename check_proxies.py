@@ -1,3 +1,5 @@
+# check_proxies.py (улучшенная версия)
+
 import requests
 import subprocess
 import tempfile
@@ -8,16 +10,21 @@ from urllib.parse import urlparse, parse_qs
 import socket
 import socks  # PySocks
 
+# --- Ваши функции fetch_proxies, parse_vless, setup_v2ray остаются без изменений ---
+
 # Скачиваем первые 100 прокси
 def fetch_proxies(url, num=100):
+    print(f"Fetching {num} proxies from {url}...")
     try:
         response = requests.get(url, timeout=10)
         lines = response.text.strip().split('\n')[:num]
+        print(f"Successfully fetched {len(lines)} lines.")
         return [line.strip() for line in lines if line.strip() and line.startswith('vless://')]
-    except Exception:
+    except Exception as e:
+        print(f"Error fetching proxies: {e}")
         return []
 
-# Кастомный парсер VLESS (работает с вашими примерами)
+# Кастомный парсер VLESS
 def parse_vless(vless_url):
     try:
         if not vless_url.startswith('vless://'):
@@ -52,81 +59,126 @@ def parse_vless(vless_url):
             'params': params,
             'remark': remark
         }
-    except Exception:
+    except Exception as e:
+        print(f"Failed to parse VLESS URL: {vless_url} | Error: {e}")
         return None
 
-# Скачиваем V2Ray бинарник (linux-64 для Actions; для Windows адаптируйте URL)
+# Скачиваем V2Ray бинарник
 def setup_v2ray():
     if not os.path.exists('v2ray'):
-        url = 'https://github.com/v2fly/v2ray-core/releases/latest/download/v2ray-linux-64.zip'  # Для Windows: v2ray-windows-64.zip
-        with open('v2ray.zip', 'wb') as f:
-            f.write(requests.get(url).content)
-        subprocess.run(['unzip', 'v2ray.zip', '-d', '.'], check=True)
-        os.chmod('v2ray', 0o755)
-        os.remove('v2ray.zip')
+        print("V2Ray not found, downloading...")
+        url = 'https://github.com/v2fly/v2ray-core/releases/latest/download/v2ray-linux-64.zip'
+        try:
+            with open('v2ray.zip', 'wb') as f:
+                f.write(requests.get(url, timeout=30).content)
+            subprocess.run(['unzip', 'v2ray.zip', '-d', '.'], check=True)
+            os.chmod('v2ray', 0o755)
+            os.remove('v2ray.zip')
+            print("V2Ray downloaded and set up successfully.")
+        except Exception as e:
+            print(f"Failed to setup V2Ray: {e}")
+            return None
     return './v2ray'
 
-# Проверка одного прокси (timeout 5 сек)
-def check_proxy(parsed):
-    if not parsed:
+# Проверка одного прокси
+def check_proxy(vless_url, parsed_proxy):
+    if not parsed_proxy:
         return False
-    # Генерируем V2Ray config
+
+    print(f"\n--- Checking proxy: {parsed_proxy.get('remark', parsed_proxy.get('address'))} ---")
+    
     config = {
+        "log": {"loglevel": "warning"},
         "inbounds": [{"port": 10808, "listen": "127.0.0.1", "protocol": "socks"}],
         "outbounds": [{
             "protocol": "vless",
-            "settings": {
-                "vnext": [{
-                    "address": parsed['address'],
-                    "port": parsed['port'],
-                    "users": [{"id": parsed['id']}]
-                }]
-            },
+            "settings": { "vnext": [{"address": parsed_proxy['address'], "port": parsed_proxy['port'], "users": [{"id": parsed_proxy['id']}] }] },
             "streamSettings": {
-                "network": parsed['network'],
-                "security": parsed['security'],
-                "tlsSettings": {"serverName": parsed['sni']} if parsed['security'] == 'tls' else {},
-                "wsSettings": {"path": parsed['path']} if parsed['network'] == 'ws' else {}
+                "network": parsed_proxy['network'],
+                "security": parsed_proxy['security'],
+                "tlsSettings": {"serverName": parsed_proxy['sni']} if parsed_proxy['security'] == 'tls' else None,
+                "wsSettings": {"path": parsed_proxy['path']} if parsed_proxy['network'] == 'ws' else None
             }
         }]
     }
+    
+    # Убираем null значения из конфига для чистоты
+    if config["outbounds"][0]["streamSettings"]["tlsSettings"] is None:
+        del config["outbounds"][0]["streamSettings"]["tlsSettings"]
+    if config["outbounds"][0]["streamSettings"]["wsSettings"] is None:
+        del config["outbounds"][0]["streamSettings"]["wsSettings"]
+
+    config_path = ''
     with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
         json.dump(config, f, indent=2)
         config_path = f.name
 
     v2ray_path = setup_v2ray()
+    if not v2ray_path:
+        return False
+        
     proc = None
     try:
-        proc = subprocess.Popen([v2ray_path, 'run', '-c', config_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        time.sleep(2)  # Ждём запуска
+        print("Starting V2Ray process...")
+        proc = subprocess.Popen([v2ray_path, 'run', '-c', config_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        time.sleep(3) # Увеличиваем время ожидания
 
-        # Тест через SOCKS
+        # Проверяем, не завершился ли процесс с ошибкой
+        if proc.poll() is not None:
+            stdout, stderr = proc.communicate()
+            print(f"V2Ray process failed to start. Stderr: {stderr.strip()}")
+            return False
+
+        print("Testing connection through SOCKS proxy...")
         socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 10808)
         socket.socket = socks.socksocket
-        response = requests.get('http://httpbin.org/ip', timeout=5)
-        return response.status_code == 200
-    except Exception:
+        
+        start_time = time.time()
+        # Увеличиваем таймаут
+        response = requests.get('http://httpbin.org/ip', timeout=10)
+        end_time = time.time()
+
+        if response.status_code == 200:
+            print(f"SUCCESS: Proxy is working. Response time: {end_time - start_time:.2f}s")
+            return True
+        else:
+            print(f"FAILURE: Proxy responded with status code {response.status_code}")
+            return False
+            
+    except Exception as e:
+        # Теперь мы видим конкретную ошибку
+        print(f"FAILURE: An error occurred during check: {e}")
         return False
+        
     finally:
-        if proc:
+        if proc and proc.poll() is None:
             proc.terminate()
-            proc.wait(timeout=5)
-        os.unlink(config_path)
-        socks.set_default_proxy()  # Сброс
-        socket.socket = socket.socket
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+        if os.path.exists(config_path):
+            os.unlink(config_path)
+        socks.set_default_proxy() # Сброс
+        socket.socket = socket.socket # Восстанавливаем стандартный сокет
 
 # Основная логика
 url = "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt"
 proxies = fetch_proxies(url, 100)
 working = []
 
-for proxy in proxies:
-    parsed = parse_vless(proxy)
-    if parsed and check_proxy(parsed):
-        working.append(proxy)
-    time.sleep(2)  # Пауза от банов
+for i, proxy_url in enumerate(proxies):
+    print(f"\n======== Processing proxy {i+1}/{len(proxies)} ========")
+    parsed = parse_vless(proxy_url)
+    if parsed and check_proxy(proxy_url, parsed):
+        working.append(proxy_url)
 
 with open('working_vless.txt', 'w') as f:
-    f.write('\n'.join(working) + '\n')
+    if working:
+        f.write('\n'.join(working) + '\n')
+    else:
+        f.write('') # Создаем пустой файл, если ничего не найдено
 
-print(f"Рабочих прокси: {len(working)}")
+print(f"\n======================================")
+print(f"Check complete. Found {len(working)} working proxies.")
+print(f"======================================")

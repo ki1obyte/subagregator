@@ -21,29 +21,34 @@ jobs:
         with:
           python-version: '3.12'
           
-      # --- НОВЫЙ ШАГ: Кэширование V2Ray ---
-      # Этот шаг будет искать v2ray в кэше и восстанавливать его, если он был сохранен ранее.
-      - name: Cache V2Ray binary
-        id: cache-v2ray
+      # --- НОВЫЙ ШАГ: Автоматическое определение последней версии Xray ---
+      - name: Get latest Xray version
+        id: get_xray_version
+        run: |
+          # Используем API GitHub, чтобы получить тег последнего релиза и записать его в переменную окружения
+          echo "XRAY_VERSION=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest | jq -r .tag_name)" >> $GITHUB_ENV
+      
+      # Шаг 3: Кэширование бинарного файла Xray с динамическим ключом
+      - name: Cache Xray binary
+        id: cache-xray
         uses: actions/cache@v4
         with:
-          # Указываем, какой файл или папку нужно кэшировать
-          path: v2ray
-          # Создаем уникальный ключ для кэша. Если ключ совпадает, кэш восстанавливается.
-          key: ${{ runner.os }}-v2ray-v5.15.0 # Рекомендуется добавлять версию, чтобы кэш обновлялся при смене версии v2ray
+          path: xray
+          # Ключ теперь использует переменную, полученную на предыдущем шаге.
+          # Кэш будет автоматически обновляться при выходе новой версии Xray.
+          key: ${{ runner.os }}-xray-core-${{ env.XRAY_VERSION }}
 
-      # Шаг 3: Установка зависимостей
+      # Шаг 4: Установка зависимостей
       - name: Install dependencies
         run: |
           sudo apt-get update && sudo apt-get install -y unzip
           pip install requests PySocks
 
-      # Шаг 4: Запуск скрипта проверки
-      # Теперь скрипт будет находить v2ray в кэше (если он есть) и не будет его скачивать
+      # Шаг 5: Запуск скрипта проверки
       - name: Run proxy check
         run: python check_proxies.py
 
-      # Шаг 5: Коммит и отправка изменений
+      # Шаг 6: Коммит и отправка изменений
       - name: Commit and push changes
         run: |
           git config --local user.email "action@github.com"

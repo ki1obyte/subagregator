@@ -15,21 +15,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # --- ИСПРАВЛЕННЫЙ ШАГ УСТАНОВКИ ---
       - name: Download and prepare subconverter
         run: |
-          # 1. Скачиваем последнюю версию subconverter
           wget -O subconverter.tar.gz https://github.com/tindy2013/subconverter/releases/latest/download/subconverter_linux64.tar.gz
-          # 2. Распаковываем архив
           tar -xvf subconverter.tar.gz
-          # 3. Делаем исполняемый файл (который лежит внутри папки) исполняемым
           chmod +x subconverter/subconverter
 
       # --- ИСПРАВЛЕННЫЙ ШАГ ПРОВЕРКИ ---
       - name: Check proxies and save working ones
         run: |
-          # Теперь мы явно указываем путь к исполняемому файлу внутри папки subconverter
-          ./subconverter/subconverter -g -u "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt" --speedtest 50 > public/checked-proxies.txt
+          # Добавляем 2>/dev/null чтобы заглушить служебный вывод
+          ./subconverter/subconverter -g -u "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt" --speedtest 300 2>/dev/null > public/checked-proxies.txt
         continue-on-error: true
         
       - name: Check if result file exists

@@ -97,13 +97,15 @@ jobs:
         with:
           pattern: results-batch-*
           path: results
-          # Эта опция теперь не так важна, но пусть будет
-          merge-multiple: true 
+          # С этим исправлением опция merge-multiple становится неважной
 
       - name: Combine results and push to target repo
         run: |
           # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-          # Ищем файлы *.txt во всех поддиректориях `results`
+          # Включаем опцию globstar для работы **
+          shopt -s globstar
+          
+          # Теперь эта команда будет работать правильно, заглядывая в подпапки
           cat results/**/*.txt > final_results.txt || true
           
           echo "Total working REALITY proxies found: $(wc -l < final_results.txt)"
@@ -119,8 +121,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            # Вернул осмысленное сообщение коммита
-            git commit -m "$(date +'%Y-%м-%d %H:%M')"
+            git commit -m "$(date +'%Y-%m-%d %H:%M')"
             git push
           fi
         env:

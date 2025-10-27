@@ -170,7 +170,7 @@ def check_proxy(vless_url, parsed):
 
 # Main logic
 url = "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt"
-proxies = fetch_proxies(url, 100)
+proxies = fetch_proxies(url, 10)
 working = []
 
 for i, proxy_url in enumerate(proxies):
@@ -188,5 +188,6 @@ with open('test.txt', 'w') as f:
 print(f"\n======================================")
 print(f"Check complete. Found {len(working)} working proxies.")
 print(f"======================================")
+
 
 

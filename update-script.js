@@ -5,7 +5,7 @@ const SOURCES = [
     {
         groupName: "⭐ Проверенные",
         subscriptions: [
-            { protocol: "working vless", url: "https://raw.githubusercontent.com/ki1obyte/325234657545/refs/heads/main/test.txt" },
+            { protocol: "Working VLESS", url: "https://raw.githubusercontent.com/ki1obyte/325234657545/refs/heads/main/test.txt" },
             { protocol: "SkySafe, Waicore", url: "https://raw.githubusercontent.com/ki1obyte/325234657545/refs/heads/main/config.txt" }
         ]
     },
@@ -196,6 +196,7 @@ async function main() {
 }
 
 main();
+
 
 
 

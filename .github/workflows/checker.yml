@@ -20,7 +20,7 @@ jobs:
           
           # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Фильтруем ТОЛЬКО REALITY прокси с непустым pbk ---
           # 'pbk=.+' ищет 'pbk=' ПОСЛЕ которого есть хотя бы один символ
-          grep -E 'pbk=.+|security=reality' all_proxies.txt > reality_proxies.txt || true
+          grep -E 'pbk=[^&]+|security=reality' all_proxies.txt > reality_proxies.txt || true
           
           # Определяем количество параллельных заданий
           NUM_JOBS=10

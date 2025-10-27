@@ -67,7 +67,7 @@ jobs:
             echo "No changes to commit."
           else
             # Если изменения есть, делаем коммит и пуш
-            git commit -m "Updated working VLESS proxies: $(date +'%Y-%m-%d %H:%M')"
+            git commit -m "$(date +'%Y-%m-%d %H:%M')"
             git push
           fi
         env:

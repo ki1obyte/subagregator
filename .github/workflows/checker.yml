@@ -6,12 +6,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  # --- ЗАДАНИЕ 1: ПОДГОТОВКА ---
+  # --- ЗАДАНИЕ 1: ПОДГОТОВКА (ИСПРАВЛЕНО) ---
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      # Передаем количество созданных частей в другие задания
-      num_jobs: ${{ steps.split.outputs.num_jobs }}
+      # Теперь мы выводим готовую JSON-строку для матрицы
+      job_matrix: ${{ steps.split.outputs.job_matrix }}
     steps:
       - name: Fetch and split proxies
         id: split
@@ -26,12 +26,14 @@ jobs:
           split -d -n l/$NUM_JOBS all_proxies.txt proxies_
           
           # Переименовываем файлы для удобства
-          for file in proxies_*; do
-            mv "$file" "$file.txt"
+          for i in $(seq 0 $((NUM_JOBS - 1))); do
+            mv "proxies_$(printf "%02d" $i)" "proxies_$i.txt"
           done
           
-          # Записываем количество частей в output
-          echo "num_jobs=$NUM_JOBS" >> $GITHUB_OUTPUT
+          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+          # Генерируем JSON-массив [0, 1, ..., N-1] для матрицы
+          JOB_MATRIX=$(jq -nc '[range(0; $num)]' --argjson num $NUM_JOBS)
+          echo "job_matrix=$JOB_MATRIX" >> $GITHUB_OUTPUT
 
       - name: Upload proxy chunks
         uses: actions/upload-artifact@v4
@@ -39,16 +41,16 @@ jobs:
           name: proxy-chunks
           path: proxies_*.txt
 
-  # --- ЗАДАНИЕ 2: ПАРАЛЛЕЛЬНАЯ ПРОВЕРКА ---
+  # --- ЗАДАНИЕ 2: ПАРАЛЛЕЛЬНАЯ ПРОВЕРКА (ИСПРАВЛЕНО) ---
   check:
     runs-on: ubuntu-latest
-    # Запускается после подготовки
     needs: prepare
-    # Создает матрицу из N заданий (0, 1, 2, 3)
     strategy:
+      # Указываем, что нужно продолжать другие задания, даже если одно упало
+      fail-fast: false
       matrix:
-        # Создаем массив чисел от 0 до (N-1)
-        job_index: ${{ fromJson(format('[{0}]', join(range(0, needs.prepare.outputs.num_jobs), ','))) }}
+        # Используем готовую JSON-строку из 'prepare'
+        job_index: ${{ fromJson(needs.prepare.outputs.job_matrix) }}
 
     steps:
       - name: Check out repository
@@ -87,23 +89,22 @@ jobs:
           name: results-batch-${{ matrix.job_index }}
           path: test.txt
 
-  # --- ЗАДАНИЕ 3: СБОРКА РЕЗУЛЬТАТОВ И ПУШ ---
+  # --- ЗАДАНИЕ 3: СБОРКА РЕЗУЛЬТАТОВ (БЕЗ ИЗМЕНЕНИЙ) ---
   collect:
     runs-on: ubuntu-latest
-    # Запускается после завершения ВСЕХ параллельных проверок
     needs: check
     steps:
       - name: Download all result batches
         uses: actions/download-artifact@v4
         with:
-          # Скачиваем все артефакты с результатами
           pattern: results-batch-*
           path: results
-          merge-multiple: true # Складываем все в одну папку
+          merge-multiple: true
 
       - name: Combine results and push to target repo
         run: |
           # Объединяем все файлы с результатами в один test.txt
+          # find . -type f -name "*.txt" -exec cat {} + > final_results.txt
           cat results/*.txt > final_results.txt
           
           echo "Total working proxies found: $(wc -l < final_results.txt)"

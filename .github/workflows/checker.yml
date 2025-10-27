@@ -1,0 +1,62 @@
+name: Check Proxies Availability
+
+on:
+  schedule:
+    # Запускать каждые 6 часов. Вы можете настроить это время.
+    # '0 */6 * * *' -> в 00:00, 06:00, 12:00, 18:00 по UTC.
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    # Позволяет запускать вручную
+
+jobs:
+  check-and-save:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write # Даем права на запись в репозиторий
+
+    steps:
+      # 1. Скачиваем код нашего репозитория, чтобы иметь куда сохранять результат
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Скачиваем файл с прокси, который будем проверять
+      - name: Download proxy list
+        run: curl -o proxies_to_check.txt https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt
+
+      # 3. Устанавливаем x-cli (инструмент для проверки)
+      - name: Install Xray-core (x-cli)
+        run: |
+          # Скачиваем последнюю версию xray
+          wget -O xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
+          # Распаковываем
+          unzip xray.zip xray
+          # Делаем исполняемым
+          chmod +x xray
+
+      # 4. Проверяем прокси и сохраняем рабочие
+      # Команда `./xray sub` читает файл, тестирует и выводит результат
+      # Мы берем только первые 100 строк из файла для проверки (`head -n 100`)
+      - name: Check proxies and save working ones
+        run: |
+          head -n 100 proxies_to_check.txt | ./xray sub -o public/checked-proxies.txt
+        continue-on-error: true # Продолжаем, даже если команда проверки выдаст ошибку
+
+      # 5. Проверяем, был ли создан файл с рабочими прокси
+      - name: Check if result file exists
+        id: check_file
+        run: |
+          if [ -s public/checked-proxies.txt ]; then
+            echo "file_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "No working proxies found. Skipping commit."
+            echo "file_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      # 6. Сохраняем результат в репозиторий, ТОЛЬКО если были найдены рабочие прокси
+      - name: Commit and push checked proxies
+        if: steps.check_file.outputs.file_exists == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Автоматическое обновление проверенных прокси"
+          file_pattern: "public/checked-proxies.txt"

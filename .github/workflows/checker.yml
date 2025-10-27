@@ -2,11 +2,12 @@ name: Check VLESS Proxies (Parallel, REALITY-only)
 
 on:
   schedule:
+    # Запускается каждый день в 00:00 по UTC (03:00 по Москве)
     - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
-  # --- ЗАДАНИЕ 1: ПОДГОТОВКА И СТРОГАЯ ФИЛЬТРАЦИЯ ---
+  # ЗАДАНИЕ 1: ПОДГОТОВКА И ФИЛЬТРАЦИЯ
   prepare:
     runs-on: ubuntu-latest
     outputs:
@@ -15,14 +16,12 @@ jobs:
       - name: Fetch, Filter, and Split Proxies
         id: split
         run: |
-          # Скачиваем полный список прокси
-          curl -s https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/main/splitted-by-protocol/vless.txt -o all_proxies.txt
+          curl -s https://raw.githubusercontent.com/ki1obyte/325234657545/refs/heads/main/test2.txt -o all_proxies.txt
           
-          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Фильтруем ТОЛЬКО REALITY прокси с непустым pbk ---
-          # 'pbk=.+' ищет 'pbk=' ПОСЛЕ которого есть хотя бы один символ
+          # Фильтруем ТОЛЬКО REALITY прокси с непустым pbk
           grep -E 'pbk=[^&]+|security=reality' all_proxies.txt > reality_proxies.txt || true
           
-          # Определяем количество параллельных заданий
+          # Устанавливаем желаемое количество параллельных заданий
           NUM_JOBS=10
           
           # Разделяем наш отфильтрованный файл на N частей
@@ -30,7 +29,10 @@ jobs:
           
           # Переименовываем файлы для удобства
           for i in $(seq 0 $((NUM_JOBS - 1))); do
-            mv "proxies_$(printf "%02d" $i)" "proxies_$i.txt"
+            # Проверяем, существует ли файл, перед переименованием
+            if [ -f "proxies_$(printf "%02d" $i)" ]; then
+              mv "proxies_$(printf "%02d" $i)" "proxies_$i.txt"
+            fi
           done
           
           # Генерируем JSON-массив [0, 1, ..., N-1] для матрицы
@@ -43,7 +45,7 @@ jobs:
           name: proxy-chunks
           path: proxies_*.txt
 
-  # --- ЗАДАНИЕ 2: ПАРАЛЛЕЛЬНАЯ ПРОВЕРКА (БЕЗ ИЗМЕНЕНИЙ) ---
+  # ЗАДАНИЕ 2: ПАРАЛЛЕЛЬНАЯ ПРОВЕРКА
   check:
     runs-on: ubuntu-latest
     needs: prepare
@@ -73,15 +75,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: proxy-chunks
+      
+      # ИЗМЕНЕНИЕ: Передаем скрипту уникальное имя выходного файла
       - name: Run proxy check on chunk
-        run: python check_proxies.py proxies_${{ matrix.job_index }}.txt
+        run: python check_proxies.py proxies_${{ matrix.job_index }}.txt results_${{ matrix.job_index }}.txt
+
+      # ИЗМЕНЕНИЕ: Загружаем уникальный файл с результатами
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
           name: results-batch-${{ matrix.job_index }}
-          path: test.txt
+          path: results_${{ matrix.job_index }}.txt
 
-  # --- ЗАДАНИЕ 3: СБОРКА РЕЗУЛЬТАТОВ (БЕЗ ИЗМЕНЕНИЙ) ---
+  # ЗАДАНИЕ 3: СБОРКА РЕЗУЛЬТАТОВ
   collect:
     runs-on: ubuntu-latest
     needs: check
@@ -89,15 +95,21 @@ jobs:
       - name: Download all result batches
         uses: actions/download-artifact@v4
         with:
+          # Скачиваем все артефакты, созданные на предыдущем шаге
           pattern: results-batch-*
           path: results
-          merge-multiple: true
+
       - name: Combine results and push to target repo
         run: |
+          # Объединяем все скачанные файлы с результатами в один
           cat results/*.txt > final_results.txt || true
+          
           echo "Total working REALITY proxies found: $(wc -l < final_results.txt)"
+          
           git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/ki1obyte/325234657545.git target_repo
+          
           mv final_results.txt target_repo/test.txt
+          
           cd target_repo
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"

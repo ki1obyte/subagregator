@@ -1,4 +1,4 @@
-# check_proxies.py (исправленная версия)
+# check_proxies.py (финальная версия с поддержкой WS Host и gRPC)
 
 import requests
 import subprocess
@@ -6,9 +6,9 @@ import tempfile
 import os
 import time
 import json
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, unquote
 import socket
-import socks  # PySocks
+import socks
 
 def fetch_proxies(url, num=100):
     print(f"Fetching {num} proxies from {url}...")
@@ -23,43 +23,23 @@ def fetch_proxies(url, num=100):
 
 def parse_vless(vless_url):
     try:
-        if not vless_url.startswith('vless://'):
-            return None
-        content = vless_url[8:]
-        remark = ''
-        if '#' in content:
-            content, remark = content.rsplit('#', 1)
-        user, addr_port_query = content.split('@', 1)
-        uuid = user
-        if '?' in addr_port_query:
-            addr_port, query = addr_port_query.split('?', 1)
-            params = {k: v[0] for k, v in parse_qs(query).items()}
-        else:
-            addr_port = addr_port_query
-            params = {}
-            
-        host, port_str = addr_port.rsplit(':', 1)
+        parsed_url = urlparse(vless_url)
+        params = parse_qs(parsed_url.query)
         
-        # --- ИСПРАВЛЕНИЕ №1: Убираем слэш из порта, если он есть ---
-        if '/' in port_str:
-            port_str = port_str.split('/')[0]
-            
-        port = int(port_str)
+        remark = unquote(parsed_url.fragment) if parsed_url.fragment else ''
+        host, port_str = parsed_url.netloc.split('@')[1].rsplit(':', 1)
         
-        # Defaults
-        security = params.get('security', 'none')
-        network = params.get('type', 'tcp')
-        path = params.get('path', '/')
-        sni = params.get('sni', host)
+        # --- ИЗМЕНЕНИЕ 1: Улучшенный парсинг для всех типов ---
         return {
-            'id': uuid,
+            'id': parsed_url.netloc.split('@')[0],
             'address': host,
-            'port': port,
-            'security': security,
-            'network': network,
-            'path': path,
-            'sni': sni,
-            'params': params,
+            'port': int(port_str),
+            'network': params.get('type', ['tcp'])[0],
+            'security': params.get('security', ['none'])[0],
+            'sni': params.get('sni', [params.get('host', [''])[0]])[0] or host,
+            'ws_path': params.get('path', ['/'])[0],
+            'ws_host': params.get('host', [''])[0], # Host для заголовка WS
+            'grpc_serviceName': params.get('serviceName', [''])[0], # serviceName для gRPC
             'remark': remark
         }
     except Exception as e:
@@ -73,7 +53,7 @@ def setup_v2ray():
         try:
             with open('v2ray.zip', 'wb') as f:
                 f.write(requests.get(url, timeout=30).content)
-            subprocess.run(['unzip', 'v2ray.zip', '-d', '.'], check=True, stdout=subprocess.DEVNULL)
+            subprocess.run(['unzip', '-o', 'v2ray.zip', '-d', '.'], check=True, stdout=subprocess.DEVNULL)
             os.chmod('v2ray', 0o755)
             os.remove('v2ray.zip')
             print("V2Ray downloaded and set up successfully.")
@@ -82,33 +62,37 @@ def setup_v2ray():
             return None
     return './v2ray'
 
-def check_proxy(vless_url, parsed_proxy):
-    if not parsed_proxy:
+def check_proxy(vless_url, parsed):
+    if not parsed:
         return False
 
-    print(f"\n--- Checking proxy: {parsed_proxy.get('remark', parsed_proxy.get('address'))} ---")
+    print(f"\n--- Checking proxy: {parsed.get('remark') or parsed.get('address')} ({parsed.get('network')}) ---")
     
-    # --- ИСПРАВЛЕНИЕ №2: Добавлен обязательный параметр "encryption": "none" ---
+    # --- ИЗМЕНЕНИЕ 2: Динамическая генерация streamSettings ---
+    stream_settings = {
+        "network": parsed['network'],
+        "security": parsed['security'],
+    }
+    if parsed['security'] == 'tls':
+        stream_settings["tlsSettings"] = {"serverName": parsed['sni']}
+    if parsed['network'] == 'ws':
+        stream_settings["wsSettings"] = {
+            "path": parsed['ws_path'],
+            "headers": {"Host": parsed['ws_host']}
+        }
+    if parsed['network'] == 'grpc':
+        stream_settings["grpcSettings"] = {"serviceName": parsed['grpc_serviceName']}
+
     config = {
         "log": {"loglevel": "warning"},
         "inbounds": [{"port": 10808, "listen": "127.0.0.1", "protocol": "socks"}],
         "outbounds": [{
             "protocol": "vless",
-            "settings": { "vnext": [{"address": parsed_proxy['address'], "port": parsed_proxy['port'], "users": [{"id": parsed_proxy['id'], "encryption": "none"}] }] },
-            "streamSettings": {
-                "network": parsed_proxy['network'],
-                "security": parsed_proxy['security'],
-                "tlsSettings": {"serverName": parsed_proxy['sni']} if parsed_proxy['security'] == 'tls' else None,
-                "wsSettings": {"path": parsed_proxy['path']} if parsed_proxy['network'] == 'ws' else None
-            }
+            "settings": { "vnext": [{"address": parsed['address'], "port": parsed['port'], "users": [{"id": parsed['id'], "encryption": "none"}] }] },
+            "streamSettings": stream_settings
         }]
     }
     
-    if config["outbounds"][0]["streamSettings"]["tlsSettings"] is None:
-        del config["outbounds"][0]["streamSettings"]["tlsSettings"]
-    if config["outbounds"][0]["streamSettings"]["wsSettings"] is None:
-        del config["outbounds"][0]["streamSettings"]["wsSettings"]
-
     config_path = ''
     with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
         json.dump(config, f, indent=2)
@@ -134,7 +118,7 @@ def check_proxy(vless_url, parsed_proxy):
         socket.socket = socks.socksocket
         
         start_time = time.time()
-        response = requests.get('http://httpbin.org/ip', timeout=10)
+        response = requests.get('http://httpbin.org/ip', timeout=15) # Увеличен таймаут
         end_time = time.time()
 
         if response.status_code == 200:
@@ -156,7 +140,9 @@ def check_proxy(vless_url, parsed_proxy):
         if os.path.exists(config_path):
             os.unlink(config_path)
         socks.set_default_proxy()
-        socket.socket = socket.socket
+        # Это не нужно, так как мы восстанавливаем стандартный сокет
+        # socket.socket = socket.socket 
+        # Достаточно сбросить прокси
 
 # Основная логика
 url = "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt"

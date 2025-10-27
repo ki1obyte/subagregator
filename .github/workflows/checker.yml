@@ -1,46 +1,41 @@
-name: Check Proxies Availability
+name: Check VLESS Proxies
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 */6 * * *'  # Каждые 6 часов
   workflow_dispatch:
 
 jobs:
-  check-and-save:
+  check:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_TOKEN }}
 
-      - name: Download and prepare subconverter
-        run: |
-          wget -O subconverter.tar.gz https://github.com/tindy2013/subconverter/releases/latest/download/subconverter_linux64.tar.gz
-          tar -xvf subconverter.tar.gz
-          chmod +x subconverter/subconverter
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
 
-      # --- ИСПРАВЛЕННЫЙ ШАГ ПРОВЕРКИ ---
-      - name: Check proxies and save working ones
-        run: |
-          # Добавляем 2>/dev/null чтобы заглушить служебный вывод
-          ./subconverter/subconverter -g -u "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt" --speedtest 300 2>/dev/null > public/checked-proxies.txt
-        continue-on-error: true
-        
-      - name: Check if result file exists
-        id: check_file
-        run: |
-          if [ -s public/checked-proxies.txt ]; then
-            echo "file_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "No working proxies found. Skipping commit."
-            echo "file_exists=false" >> $GITHUB_OUTPUT
-          fi
+    - name: Install dependencies
+      run: |
+        sudo apt update && sudo apt install -y unzip wget
+        pip install requests PySocks
 
-      - name: Commit and push checked proxies
-        if: steps.check_file.outputs.file_exists == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "Автоматическое обновление проверенных прокси"
-          file_pattern: "public/checked-proxies.txt"
+    - name: Run proxy check
+      run: python check_proxies.py
+
+    - name: Commit changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add working_vless.txt
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Updated working VLESS proxies: $(date +'%Y-%m-%d %H:%M')"
+          git push
+        fi
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}

@@ -179,7 +179,7 @@ for i, proxy_url in enumerate(proxies):
     if parsed and check_proxy(proxy_url, parsed):
         working.append(proxy_url)
 
-with open('working_vless.txt', 'w') as f:
+with open('test.txt', 'w') as f:
     if working:
         f.write('\n'.join(working) + '\n')
     else:
@@ -188,4 +188,5 @@ with open('working_vless.txt', 'w') as f:
 print(f"\n======================================")
 print(f"Check complete. Found {len(working)} working proxies.")
 print(f"======================================")
+
 

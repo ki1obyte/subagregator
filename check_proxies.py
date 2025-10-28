@@ -139,7 +139,7 @@ def check_proxy(vless_url, parsed):
             socket.socket = socks.socksocket
             
             start_time = time.time()
-            response = requests.get('http://httpbin.org/ip', timeout=30)
+            response = requests.get(ip_url, timeout=15)  # Используем выбранный URL и уменьшенный timeout
             end_time = time.time()
 
             if response.status_code == 200:
@@ -182,6 +182,15 @@ if __name__ == "__main__":
 
     input_file = sys.argv[1]
     output_file = sys.argv[2] # Получаем имя выходного файла
+
+    # Проверка доступности основного URL без прокси
+    try:
+        requests.get('https://checkip.amazonaws.com', timeout=5)
+        ip_url = 'https://checkip.amazonaws.com'
+        print("Using primary IP check URL: https://checkip.amazonaws.com")
+    except Exception as e:
+        ip_url = 'https://api.ipify.org/'
+        print(f"Primary URL unavailable ({e}), falling back to: https://api.ipify.org/")
 
     proxies_to_check = read_proxies_from_file(input_file)
     working = []

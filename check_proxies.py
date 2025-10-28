@@ -1,4 +1,4 @@
-# check_proxies.py (финальная версия с повторными попытками)
+# check_proxies.py (финальная версия с улучшенными логами и повторными попытками)
 
 import requests
 import subprocess
@@ -82,18 +82,23 @@ def check_proxy(proxy_url):
     if not parsed:
         return None
 
+    # --- ИЗМЕНЕНИЕ 1: Подготовка данных для улучшенного лога ---
     remark = parsed.get('remark') or parsed.get('address')
-    print(f"\n--- Checking proxy: {remark} ({parsed.get('network')}) ---")
+    ip_port = f"{parsed.get('address')}:{parsed.get('port')}"
+    network_type = parsed.get('network', 'tcp')
+    if parsed.get('security') == 'reality':
+        network_type = f"{network_type}-reality"
+    
+    # --- ИЗМЕНЕНИЕ 2: Вывод улучшенного лога ---
+    print(f"\n--- Checking proxy: {ip_port} {remark} ({network_type}) ---")
 
-    # --- ЛОГИКА ПОВТОРНЫХ ПОПЫТОК ---
     max_retries = 10
-    retry_delay = 2 # секунды
+    retry_delay = 2
 
     for attempt in range(max_retries):
         if attempt > 0:
             print(f"--- Retrying ({attempt + 1}/{max_retries})... ---")
 
-        # Вся логика проверки находится внутри цикла
         stream_settings = {"network": parsed['network'], "security": parsed['security']}
     
         if parsed['security'] in ['tls', 'reality']:
@@ -141,7 +146,6 @@ def check_proxy(proxy_url):
 
             xray_path = setup_xray()
             if not xray_path:
-                # Если Xray не удалось скачать, нет смысла в повторах
                 return None
 
             process = subprocess.Popen([xray_path, 'run', '-c', config_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -157,7 +161,7 @@ def check_proxy(proxy_url):
             
             if result.returncode == 0 and 'fl=' in stdout_str:
                 print(f"SUCCESS: Proxy is working. Latency: {latency:.2f} ms")
-                return proxy_url # Немедленный выход из функции при успехе
+                return proxy_url
             else:
                 stderr_str = result.stderr.decode('utf-8', errors='ignore')
                 print(f"FAILURE (Attempt {attempt + 1}/{max_retries}): Proxy check failed. Curl exit code: {result.returncode}, Stderr: {stderr_str.strip()}")
@@ -172,11 +176,9 @@ def check_proxy(proxy_url):
             if os.path.exists(config_path):
                 os.unlink(config_path)
 
-        # Если это не последняя попытка, делаем задержку
         if attempt < max_retries - 1:
             time.sleep(retry_delay)
 
-    # Если цикл завершился без успешного `return`, значит все попытки провалены
     print(f"All {max_retries} attempts failed for this proxy.")
     return None
 

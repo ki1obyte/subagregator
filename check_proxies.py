@@ -1,4 +1,4 @@
-# check_proxies.py (финальная версия с исправлением ошибки кодировки)
+# check_proxies.py (финальная версия с повторными попытками)
 
 import requests
 import subprocess
@@ -75,8 +75,8 @@ def setup_xray():
 
 def check_proxy(proxy_url):
     """
-    Проверяет прокси, запуская Xray как клиент и тестируя соединение через curl.
-    Возвращает исходный URL, если работает, иначе None.
+    Проверяет прокси с несколькими попытками.
+    Возвращает URL в случае успеха, иначе None.
     """
     parsed = parse_vless(proxy_url)
     if not parsed:
@@ -84,94 +84,101 @@ def check_proxy(proxy_url):
 
     remark = parsed.get('remark') or parsed.get('address')
     print(f"\n--- Checking proxy: {remark} ({parsed.get('network')}) ---")
+
+    # --- ЛОГИКА ПОВТОРНЫХ ПОПЫТОК ---
+    max_retries = 10
+    retry_delay = 2 # секунды
+
+    for attempt in range(max_retries):
+        if attempt > 0:
+            print(f"--- Retrying ({attempt + 1}/{max_retries})... ---")
+
+        # Вся логика проверки находится внутри цикла
+        stream_settings = {"network": parsed['network'], "security": parsed['security']}
     
-    stream_settings = {"network": parsed['network'], "security": parsed['security']}
-    
-    if parsed['security'] in ['tls', 'reality']:
-        tls_settings = {"serverName": parsed['sni']}
-        if parsed.get('fp'):
-            tls_settings["utls"] = {"enabled": True, "fingerprint": parsed['fp']}
+        if parsed['security'] in ['tls', 'reality']:
+            tls_settings = {"serverName": parsed['sni']}
+            if parsed.get('fp'):
+                tls_settings["utls"] = {"enabled": True, "fingerprint": parsed['fp']}
+            
+            if parsed.get('security') == 'reality' and parsed.get('pbk'):
+                stream_settings["security"] = "reality"
+                stream_settings["realitySettings"] = {
+                    "show": False,
+                    "fingerprint": parsed.get('fp') or "chrome",
+                    "serverName": parsed['sni'],
+                    "publicKey": parsed['pbk'],
+                    "shortId": parsed.get('sid', ''),
+                    "spiderX": parsed.get('spx', '')
+                }
+            else:
+                stream_settings["security"] = "tls"
+                stream_settings["tlsSettings"] = tls_settings
         
-        if parsed.get('security') == 'reality' and parsed.get('pbk'):
-            stream_settings["security"] = "reality"
-            stream_settings["realitySettings"] = {
-                "show": False,
-                "fingerprint": parsed.get('fp') or "chrome",
-                "serverName": parsed['sni'],
-                "publicKey": parsed['pbk'],
-                "shortId": parsed.get('sid', ''),
-                "spiderX": parsed.get('spx', '')
-            }
-        else:
-            stream_settings["security"] = "tls"
-            stream_settings["tlsSettings"] = tls_settings
-    
-    if parsed['network'] == 'ws':
-        stream_settings["wsSettings"] = {"path": parsed['ws_path'], "headers": {"Host": parsed['ws_host']}}
-    if parsed['network'] == 'grpc':
-        stream_settings["grpcSettings"] = {"serviceName": parsed['grpc_serviceName']}
+        if parsed['network'] == 'ws':
+            stream_settings["wsSettings"] = {"path": parsed['ws_path'], "headers": {"Host": parsed['ws_host']}}
+        if parsed['network'] == 'grpc':
+            stream_settings["grpcSettings"] = {"serviceName": parsed['grpc_serviceName']}
 
-    local_port = random.randint(20000, 40000)
+        local_port = random.randint(20000, 40000)
 
-    config = {
-        "log": {"loglevel": "warning"},
-        "inbounds": [{ "port": local_port, "listen": "127.0.0.1", "protocol": "socks" }],
-        "outbounds": [{
-            "protocol": "vless", 
-            "settings": { "vnext": [{"address": parsed['address'], "port": parsed['port'], "users": [{"id": parsed['id'], "encryption": "none", "flow": parsed.get('flow', '')}] }] },
-            "streamSettings": stream_settings
-        }]
-    }
-    
-    config_path = ''
-    process = None
-    try:
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8') as f:
-            json.dump(config, f, indent=2)
-            config_path = f.name
-
-        xray_path = setup_xray()
-        if not xray_path: return None
+        config = {
+            "log": {"loglevel": "warning"},
+            "inbounds": [{ "port": local_port, "listen": "127.0.0.1", "protocol": "socks" }],
+            "outbounds": [{
+                "protocol": "vless", 
+                "settings": { "vnext": [{"address": parsed['address'], "port": parsed['port'], "users": [{"id": parsed['id'], "encryption": "none", "flow": parsed.get('flow', '')}] }] },
+                "streamSettings": stream_settings
+            }]
+        }
         
-        # Запускаем Xray в фоне
-        process = subprocess.Popen([xray_path, 'run', '-c', config_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        time.sleep(2) # Даем Xray время на запуск
+        config_path = ''
+        process = None
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8') as f:
+                json.dump(config, f, indent=2)
+                config_path = f.name
 
-        start_time = time.time()
-        curl_cmd = ['curl', '--socks5-hostname', f'127.0.0.1:{local_port}', 'https://www.cloudflare.com/cdn-cgi/trace', '-s', '--max-time', '10']
+            xray_path = setup_xray()
+            if not xray_path:
+                # Если Xray не удалось скачать, нет смысла в повторах
+                return None
+
+            process = subprocess.Popen([xray_path, 'run', '-c', config_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            time.sleep(2)
+
+            start_time = time.time()
+            curl_cmd = ['curl', '--socks5-hostname', f'127.0.0.1:{local_port}', 'https://www.cloudflare.com/cdn-cgi/trace', '-s', '--max-time', '10']
+            
+            result = subprocess.run(curl_cmd, capture_output=True, timeout=15)
+            latency = (time.time() - start_time) * 1000
+
+            stdout_str = result.stdout.decode('utf-8', errors='ignore')
+            
+            if result.returncode == 0 and 'fl=' in stdout_str:
+                print(f"SUCCESS: Proxy is working. Latency: {latency:.2f} ms")
+                return proxy_url # Немедленный выход из функции при успехе
+            else:
+                stderr_str = result.stderr.decode('utf-8', errors='ignore')
+                print(f"FAILURE (Attempt {attempt + 1}/{max_retries}): Proxy check failed. Curl exit code: {result.returncode}, Stderr: {stderr_str.strip()}")
         
-        # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-        # Убираем text=True и декодируем вручную с игнорированием ошибок
-        result = subprocess.run(curl_cmd, capture_output=True, timeout=15)
-        latency = (time.time() - start_time) * 1000
+        except Exception as e:
+            print(f"FAILURE (Attempt {attempt + 1}/{max_retries}): An error occurred during check: {e}")
+        
+        finally:
+            if process:
+                process.terminate()
+                process.wait()
+            if os.path.exists(config_path):
+                os.unlink(config_path)
 
-        # Декодируем вывод, игнорируя ошибки
-        stdout_str = result.stdout.decode('utf-8', errors='ignore')
-        stderr_str = result.stderr.decode('utf-8', errors='ignore')
+        # Если это не последняя попытка, делаем задержку
+        if attempt < max_retries - 1:
+            time.sleep(retry_delay)
 
-        if result.returncode == 0 and 'fl=' in stdout_str:
-            print(f"SUCCESS: Proxy is working. Latency: {latency:.2f} ms")
-            return proxy_url
-        else:
-            print(f"FAILURE: Proxy check failed. Curl exit code: {result.returncode}, Stderr: {stderr_str.strip()}")
-            return None
-
-    except subprocess.TimeoutExpired:
-        print("FAILURE: Test timed out.")
-        return None
-    except Exception as e:
-        print(f"FAILURE: An error occurred during check: {e}")
-        return None
-    finally:
-        if process:
-            process.terminate()
-            # Важно прочитать вывод, чтобы избежать блокировок
-            xray_stderr = process.stderr.read().decode('utf-8', errors='ignore')
-            process.wait()
-            if xray_stderr:
-                 print(f"Xray stderr: {xray_stderr.strip()}")
-        if os.path.exists(config_path):
-            os.unlink(config_path)
+    # Если цикл завершился без успешного `return`, значит все попытки провалены
+    print(f"All {max_retries} attempts failed for this proxy.")
+    return None
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:

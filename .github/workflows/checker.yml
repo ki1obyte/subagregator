@@ -16,7 +16,7 @@ jobs:
       - name: Fetch, Filter, and Split Proxies
         id: split
         run: |
-          curl -s https://raw.githubusercontent.com/ki1obyte/325234657545/refs/heads/main/test2.txt -o all_proxies.txt
+          curl -s https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt -o all_proxies.txt
           
           # Фильтруем ТОЛЬКО REALITY прокси с непустым pbk
           grep -E 'pbk=[^&]+|security=reality' all_proxies.txt > reality_proxies.txt || true

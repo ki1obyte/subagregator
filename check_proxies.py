@@ -1,4 +1,4 @@
-# check_proxies.py (финальная версия для параллельного запуска с уникальными именами)
+# check_proxies.py (финальная версия для параллельного запуска с использованием 'xray test')
 
 import requests
 import subprocess
@@ -7,19 +7,17 @@ import os
 import time
 import json
 from urllib.parse import urlparse, parse_qs, unquote
-import socket
-import socks
-import sys # Импортирован sys для работы с аргументами командной строки
+import sys
 
 def read_proxies_from_file(filepath):
+    """Читает VLESS URL из файла."""
     print(f"Reading proxies from {filepath}...")
     try:
         with open(filepath, 'r') as f:
             lines = f.read().strip().split('\n')
-        # Отфильтровываем пустые строки, которые могут появиться, если файл пуст
-        valid_lines = [line for line in lines if line]
-        print(f"Successfully read {len(valid_lines)} lines.")
-        return [line.strip() for line in valid_lines if line.strip().startswith('vless://')]
+        valid_lines = [line for line in lines if line.strip().startswith('vless://')]
+        print(f"Successfully read {len(valid_lines)} VLESS links.")
+        return valid_lines
     except FileNotFoundError:
         print(f"Input file not found: {filepath}. It might be empty, which is normal.")
         return []
@@ -28,6 +26,7 @@ def read_proxies_from_file(filepath):
         return []
 
 def parse_vless(vless_url):
+    """Парсит VLESS URL и извлекает параметры конфигурации."""
     try:
         parsed_url = urlparse(vless_url)
         params = parse_qs(parsed_url.query)
@@ -57,6 +56,7 @@ def parse_vless(vless_url):
         return None
 
 def setup_xray():
+    """Скачивает и настраивает исполняемый файл Xray, если он отсутствует."""
     if not os.path.exists('xray'):
         print("Xray not found, downloading...")
         url = 'https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip'
@@ -72,7 +72,11 @@ def setup_xray():
             return None
     return './xray'
 
-def check_proxy(vless_url, parsed):
+def check_proxy(parsed):
+    """
+    Проверяет прокси, используя встроенную команду 'xray test'.
+    Возвращает True, если прокси работает, иначе False.
+    """
     if not parsed:
         return False
 
@@ -103,112 +107,93 @@ def check_proxy(vless_url, parsed):
     if parsed['network'] == 'grpc':
         stream_settings["grpcSettings"] = {"serviceName": parsed['grpc_serviceName']}
 
+    # Конфигурация для проверки
     config = {
         "log": {"loglevel": "warning"},
-        "inbounds": [{"port": 10808, "listen": "127.0.0.1", "protocol": "socks"}],
-        "outbounds": [{"protocol": "vless", 
-                       "settings": {"vnext": [{"address": parsed['address'], "port": parsed['port'], 
-                                               "users": [{"id": parsed['id'], "encryption": "none", "flow": parsed['flow']}]}]},
-                       "streamSettings": stream_settings}]
+        "outbounds": [{
+            "protocol": "vless", 
+            "settings": {
+                "vnext": [{
+                    "address": parsed['address'], 
+                    "port": parsed['port'], 
+                    "users": [{"id": parsed['id'], "encryption": "none", "flow": parsed['flow']}]
+                }]
+            },
+            "streamSettings": stream_settings,
+            "tag": "proxy" # Тег необходим для команды test
+        }]
     }
     
-    max_retries = 10
-    retry_delay = 3
-    
-    for attempt in range(max_retries):
-        print(f"Attempt {attempt + 1}/{max_retries}...")
-        config_path = ''
-        proc = None
-        try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-                json.dump(config, f, indent=2)
-                config_path = f.name
+    config_path = ''
+    try:
+        # Создаем временный файл конфигурации
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(config, f, indent=2)
+            config_path = f.name
 
-            xray_path = setup_xray()
-            if not xray_path: return False
-                
-            proc = subprocess.Popen([xray_path, 'run', '-c', config_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            time.sleep(5)
+        xray_path = setup_xray()
+        if not xray_path: 
+            return False
 
-            if proc.poll() is not None:
-                stdout, stderr = proc.communicate()
-                print(f"Xray process failed to start. Stderr: {stderr.strip()}")
-                return False
-
-            socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 10808)
-            socket.socket = socks.socksocket
-            
-            start_time = time.time()
-            response = requests.get(ip_url, timeout=10)  # Используем выбранный URL и уменьшенный timeout
-            end_time = time.time()
-
-            if response.status_code == 200:
-                print(f"SUCCESS: Proxy is working. Response time: {end_time - start_time:.2f}s")
-                return True
-            else:
-                print(f"FAILURE on attempt {attempt + 1}: Proxy responded with status code {response.status_code}")
-
-        except Exception as e:
-            print(f"FAILURE on attempt {attempt + 1}: An error occurred: {e}")
-            
-        finally:
-            if proc:
-                if proc.poll() is None:
-                    proc.terminate()
-                    try:
-                        proc.wait(timeout=5)
-                    except subprocess.TimeoutExpired:
-                        proc.kill()
-                stdout, stderr = proc.communicate()
-                if stderr:
-                    print(f"Xray stderr: {stderr.strip()}")
-            if os.path.exists(config_path):
-                os.unlink(config_path)
-            socks.set_default_proxy()
-            time.sleep(1)
+        # Запускаем 'xray test' и ждем завершения
+        # Увеличиваем таймаут, так как проверка может занять время
+        result = subprocess.run(
+            [xray_path, 'test', '-c', config_path],
+            capture_output=True, text=True, timeout=20
+        )
         
-        if attempt < max_retries - 1:
-            print(f"Waiting for {retry_delay} seconds before retrying...")
-            time.sleep(retry_delay)
+        # Проверяем вывод на наличие сообщения об успехе
+        if "success" in result.stdout.lower():
+            # Извлекаем и выводим время отклика
+            for line in result.stdout.splitlines():
+                if "ms" in line:
+                    print(f"SUCCESS: Proxy is working. {line.strip()}")
+            return True
+        else:
+            print(f"FAILURE: Proxy check failed.")
+            # Выводим stderr для отладки, если есть
+            if result.stderr:
+                print(f"Xray stderr: {result.stderr.strip()}")
+            return False
 
-    print("All attempts failed for this proxy.")
-    return False
+    except subprocess.TimeoutExpired:
+        print("FAILURE: Xray test command timed out.")
+        return False
+    except Exception as e:
+        print(f"FAILURE: An error occurred during check: {e}")
+        return False
+    finally:
+        # Удаляем временный файл конфигурации
+        if os.path.exists(config_path):
+            os.unlink(config_path)
 
-# Основная логика, адаптированная для работы с аргументами
+# Основная логика
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage: python check_proxies.py <input_file> <output_file>")
         sys.exit(1)
 
     input_file = sys.argv[1]
-    output_file = sys.argv[2] # Получаем имя выходного файла
-
-    # Проверка доступности основного URL без прокси
-    try:
-        requests.get('https://checkip.amazonaws.com', timeout=5)
-        ip_url = 'https://checkip.amazonaws.com'
-        print("Using primary IP check URL: https://checkip.amazonaws.com")
-    except Exception as e:
-        ip_url = 'https://api.ipify.org/'
-        print(f"Primary URL unavailable ({e}), falling back to: https://api.ipify.org/")
+    output_file = sys.argv[2]
 
     proxies_to_check = read_proxies_from_file(input_file)
-    working = []
+    working_proxies = []
 
     for i, proxy_url in enumerate(proxies_to_check):
         print(f"\n======== Processing proxy {i+1}/{len(proxies_to_check)} ========")
-        parsed = parse_vless(proxy_url)
-        if parsed and check_proxy(proxy_url, parsed):
-            working.append(proxy_url)
+        parsed_proxy = parse_vless(proxy_url)
+        if parsed_proxy and check_proxy(parsed_proxy):
+            working_proxies.append(proxy_url)
 
-    # Записываем результат в УКАЗАННЫЙ выходной файл
+    # Записываем рабочие прокси в указанный выходной файл
     with open(output_file, 'w') as f:
-        if working:
-            f.write('\n'.join(working) + '\n')
+        if working_proxies:
+            f.write('\n'.join(working_proxies) + '\n')
         else:
+            # Создаем пустой файл, если рабочих прокси не найдено
             f.write('')
 
     print(f"\n======================================")
-    print(f"Check complete. Found {len(working)} working proxies in this batch.")
+    print(f"Check complete. Found {len(working_proxies)} working proxies in this batch.")
+    print(f"Results saved to {output_file}.")
     print(f"======================================")
-

@@ -113,7 +113,7 @@ def check_proxy(vless_url, parsed):
     }
     
     max_retries = 10
-    retry_delay = 5
+    retry_delay = 3
     
     for attempt in range(max_retries):
         print(f"Attempt {attempt + 1}/{max_retries}...")
@@ -139,7 +139,7 @@ def check_proxy(vless_url, parsed):
             socket.socket = socks.socksocket
             
             start_time = time.time()
-            response = requests.get(ip_url, timeout=15)  # Используем выбранный URL и уменьшенный timeout
+            response = requests.get(ip_url, timeout=10)  # Используем выбранный URL и уменьшенный timeout
             end_time = time.time()
 
             if response.status_code == 200:
@@ -211,3 +211,4 @@ if __name__ == "__main__":
     print(f"\n======================================")
     print(f"Check complete. Found {len(working)} working proxies in this batch.")
     print(f"======================================")
+

@@ -22,7 +22,7 @@ jobs:
           grep -E 'pbk=[^&]+|security=reality' all_proxies.txt > reality_proxies.txt || true
           
           # Устанавливаем желаемое количество параллельных заданий
-          NUM_JOBS=10
+          NUM_JOBS=15
           
           # Разделяем наш отфильтрованный файл на N частей
           split -d -n l/$NUM_JOBS reality_proxies.txt proxies_

@@ -3,7 +3,8 @@ name: Check VLESS Proxies (Parallel, REALITY-only)
 on:
   schedule:
     # Запускается каждый день в 00:00 по UTC (03:00 по Москве)
-    - cron: '0 0 * * *'
+    #- cron: '0 0 * * *'
+    - cron: "0 0 */2 * *"
   workflow_dispatch:
 
 jobs:

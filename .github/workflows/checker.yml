@@ -100,48 +100,41 @@ jobs:
           echo "Cloning target repository..."
           git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/ki1obyte/325234657545.git target_repo
           
-          # 1. Подготовка директории для сортировки по странам
           TARGET_DIR="target_repo/splitted-by-country"
           echo "Preparing target directory: $TARGET_DIR"
           mkdir -p "$TARGET_DIR"
           rm -rf "$TARGET_DIR"/*
           
-          # 2. Агрегация результатов по странам
           echo "Aggregating results by country..."
           find temp_results -type f -name "*.txt" | while read -r file; do
             filename=$(basename "$file")
             cat "$file" >> "$TARGET_DIR/$filename"
           done
           
-          # --- ДОБАВЛЕНО: Создаем общий файл test.txt из всех отсортированных файлов ---
           echo "Creating combined test.txt file..."
-          # Объединяем содержимое всех .txt файлов из папки по странам в один test.txt
-          # `|| true` предотвратит ошибку, если ни одного рабочего прокси не будет найдено
           cat "$TARGET_DIR"/*.txt > target_repo/test.txt || true
           
-          # 3. Подсчитываем общее количество, используя новый test.txt
           TOTAL_PROXIES=$(wc -l < target_repo/test.txt)
           echo "Total working REALITY proxies found: $TOTAL_PROXIES"
           
-          # 4. Коммитим и отправляем изменения
           cd target_repo
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          # --- ИЗМЕНЕНО: Добавляем в git и папку, и новый файл ---
           git add splitted-by-country/ test.txt
           
-          if git diff --staged --quiet; then
+          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: более надежный синтаксис if/else ---
+          # Проверяем, есть ли изменения для коммита
+          if git diff --staged --quiet
+          then
+            # Если изменений нет
             echo "No changes to commit."
           else
-            # Обновляем сообщение коммита для большей ясности
-            git commit -m "($(date +'%Y-%m-%d %H:%M')) - $TOTAL_PROXIES total"
-            echo "Pushing changes to the repository..."
-            git push
-          fi
-          else
-            # Более информативное сообщение коммита
-            git commit -m "($(date +'%Y-%m-%d %H:%M')) - Found $TOTAL_PROXIES"
+            # Если изменения есть
+            COMMIT_MESSAGE="($(date +'%Y-%m-%d %H:%M')) - $TOTAL_PROXIES total"
+            echo "Creating commit with message: $COMMIT_MESSAGE"
+            git commit -m "$COMMIT_MESSAGE"
+            
             echo "Pushing changes to the repository..."
             git push
           fi

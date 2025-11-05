@@ -1,9 +1,7 @@
-name: Check VLESS Proxies (Parallel, REALITY-only)
+name: Check VLESS Proxies (Parallel, REALITY-only, by Country)
 
 on:
   schedule:
-    # Запускается каждый день в 00:00 по UTC (03:00 по Москве)
-    #- cron: '0 0 * * *'
     - cron: "0 0 */2 * *"
   workflow_dispatch:
 
@@ -18,25 +16,17 @@ jobs:
         id: split
         run: |
           curl -s https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt -o all_proxies.txt
-          
-          # Фильтруем ТОЛЬКО REALITY прокси с непустым pbk
           grep -E 'pbk=[^&]+|security=reality' all_proxies.txt > reality_proxies.txt || true
           
-          # Устанавливаем желаемое количество параллельных заданий
           NUM_JOBS=15
-          
-          # Разделяем наш отфильтрованный файл на N частей
           split -d -n l/$NUM_JOBS reality_proxies.txt proxies_
           
-          # Переименовываем файлы для удобства
           for i in $(seq 0 $((NUM_JOBS - 1))); do
-            # Проверяем, существует ли файл, перед переименованием
             if [ -f "proxies_$(printf "%02d" $i)" ]; then
               mv "proxies_$(printf "%02d" $i)" "proxies_$i.txt"
             fi
           done
           
-          # Генерируем JSON-массив [0, 1, ..., N-1] для матрицы
           JOB_MATRIX=$(jq -nc '[range(0; $num)]' --argjson num $NUM_JOBS)
           echo "job_matrix=$JOB_MATRIX" >> $GITHUB_OUTPUT
 
@@ -77,16 +67,18 @@ jobs:
         with:
           name: proxy-chunks
       
-      # ИЗМЕНЕНИЕ: Передаем скрипту уникальное имя выходного файла
+      # --- ИЗМЕНЕНИЕ: Создаем папку для результатов и передаем ее в скрипт ---
       - name: Run proxy check on chunk
-        run: python check_proxies.py proxies_${{ matrix.job_index }}.txt results_${{ matrix.job_index }}.txt
+        run: |
+          mkdir -p results_dir_${{ matrix.job_index }}
+          python check_proxies.py proxies_${{ matrix.job_index }}.txt results_dir_${{ matrix.job_index }}
 
-      # ИЗМЕНЕНИЕ: Загружаем уникальный файл с результатами
+      # --- ИЗМЕНЕНИЕ: Загружаем папку с результатами, а не один файл ---
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
           name: results-batch-${{ matrix.job_index }}
-          path: results_${{ matrix.job_index }}.txt
+          path: results_dir_${{ matrix.job_index }}/
 
   # ЗАДАНИЕ 3: СБОРКА РЕЗУЛЬТАТОВ
   collect:
@@ -97,33 +89,59 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: results-batch-*
-          path: results
-          # С этим исправлением опция merge-multiple становится неважной
+          path: temp_results/
 
       - name: Combine results and push to target repo
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-          # Включаем опцию globstar для работы **
-          shopt -s globstar
+          set -e
           
-          # Теперь эта команда будет работать правильно, заглядывая в подпапки
-          cat results/**/*.txt > final_results.txt || true
-          
-          echo "Total working REALITY proxies found: $(wc -l < final_results.txt)"
-          
+          echo "Cloning target repository..."
           git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/ki1obyte/325234657545.git target_repo
           
-          mv final_results.txt target_repo/test.txt
+          # 1. Подготовка директории для сортировки по странам
+          TARGET_DIR="target_repo/splitted-by-country"
+          echo "Preparing target directory: $TARGET_DIR"
+          mkdir -p "$TARGET_DIR"
+          rm -rf "$TARGET_DIR"/*
           
+          # 2. Агрегация результатов по странам
+          echo "Aggregating results by country..."
+          find temp_results -type f -name "*.txt" | while read -r file; do
+            filename=$(basename "$file")
+            cat "$file" >> "$TARGET_DIR/$filename"
+          done
+          
+          # --- ДОБАВЛЕНО: Создаем общий файл test.txt из всех отсортированных файлов ---
+          echo "Creating combined test.txt file..."
+          # Объединяем содержимое всех .txt файлов из папки по странам в один test.txt
+          # `|| true` предотвратит ошибку, если ни одного рабочего прокси не будет найдено
+          cat "$TARGET_DIR"/*.txt > target_repo/test.txt || true
+          
+          # 3. Подсчитываем общее количество, используя новый test.txt
+          TOTAL_PROXIES=$(wc -l < target_repo/test.txt)
+          echo "Total working REALITY proxies found: $TOTAL_PROXIES"
+          
+          # 4. Коммитим и отправляем изменения
           cd target_repo
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add test.txt
+          
+          # --- ИЗМЕНЕНО: Добавляем в git и папку, и новый файл ---
+          git add splitted-by-country/ test.txt
+          
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "$(date +'%Y-%m-%d %H:%M')"
+            # Обновляем сообщение коммита для большей ясности
+            git commit -m "($(date +'%Y-%m-%d %H:%M')) - $TOTAL_PROXIES total"
+            echo "Pushing changes to the repository..."
             git push
           fi
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          else
+            # Более информативное сообщение коммита
+            git commit -m "($(date +'%Y-%m-%d %H:%M')) - Found $TOTAL_PROXIES"
+            echo "Pushing changes to the repository..."
+            git push
+          fi

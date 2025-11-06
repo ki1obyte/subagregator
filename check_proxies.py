@@ -1,4 +1,4 @@
-# check_proxies.py (финальная версия с определением страны и умной дедупликацией)
+# check_proxies.py (финальная версия с улучшенной дедупликацией)
 
 import requests
 import subprocess
@@ -11,8 +11,7 @@ import sys
 import random
 import re
 
-# --- НОВОЕ: Словарь для сопоставления кодов стран с их названиями ---
-# Можно расширить по необходимости
+# (Словарь COUNTRY_CODES остается без изменений)
 COUNTRY_CODES = {
     "AD": "Andorra", "AE": "United Arab Emirates", "AF": "Afghanistan", "AG": "Antigua and Barbuda",
     "AI": "Anguilla", "AL": "Albania", "AM": "Armenia", "AO": "Angola", "AQ": "Antarctica",
@@ -74,11 +73,11 @@ COUNTRY_CODES = {
 
 def get_country_name(code):
     """Возвращает полное название страны по ее двухбуквенному коду."""
-    return COUNTRY_CODES.get(code.upper(), code.upper()) # Если код не найден, вернем сам код
+    return COUNTRY_CODES.get(code.upper(), code.upper())
 
 def read_proxies_from_file(filepath):
     """
-    Читает VLESS URL из файла и выполняет дедупликацию, игнорируя ремарки.
+    Читает VLESS URL из файла и выполняет надежную дедупликацию, игнорируя ремарки.
     """
     print(f"Reading and deduplicating proxies from {filepath}...")
     unique_proxies = set()
@@ -90,24 +89,25 @@ def read_proxies_from_file(filepath):
         raw_vless_lines = [line for line in lines if line.strip().startswith('vless://')]
         
         for line in raw_vless_lines:
-            parsed = parse_vless(line)
-            if parsed:
-                # Создаем уникальный идентификатор на основе ключевых параметров, игнорируя ремарку
-                proxy_id = (
-                    parsed['id'],
-                    parsed['address'],
-                    parsed['port'],
-                    parsed.get('network'),
-                    parsed.get('security'),
-                    parsed.get('sni'),
-                    parsed.get('ws_path'),
-                    parsed.get('grpc_serviceName')
-                )
+            try:
+                parsed_url = urlparse(line)
+                # Основа идентификатора: user@host:port
+                core_id = parsed_url.netloc
+                # Параметры: сортируем для консистентности
+                params = parse_qs(parsed_url.query)
+                params_id = tuple(sorted(params.items()))
+                
+                # Создаем уникальный ключ из основы и отсортированных параметров
+                proxy_id = (core_id, params_id)
+
                 if proxy_id not in unique_proxies:
                     unique_proxies.add(proxy_id)
                     valid_lines.append(line)
+            except Exception:
+                # Игнорируем строки, которые не удалось распарсить
+                continue
         
-        print(f"Successfully read {len(raw_vless_lines)} VLESS links. Found {len(valid_lines)} unique proxies.")
+        print(f"Successfully read {len(raw_vless_lines)} VLESS links. Found {len(valid_lines)} unique proxies for checking.")
         return valid_lines
     except FileNotFoundError:
         print(f"Input file not found: {filepath}. It might be empty, which is normal.")
@@ -132,8 +132,7 @@ def parse_vless(vless_url):
             'ws_path': params.get('path', ['/'])[0], 'ws_host': params.get('host', [''])[0] or host,
             'grpc_serviceName': params.get('serviceName', [''])[0], 'remark': remark
         }
-    except Exception as e:
-        # Убрано избыточное логирование ошибок парсинга, т.к. read_proxies_from_file их обрабатывает
+    except Exception:
         return None
 
 def setup_xray():

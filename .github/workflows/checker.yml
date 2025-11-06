@@ -27,10 +27,7 @@ jobs:
         run: |
           NUM_JOBS=15
           SOURCE_URL="https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt"
-          
-          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Убран лишний префикс 'subagregator/' ---
           python prepare_and_split.py "$SOURCE_URL" $NUM_JOBS
-          
           JOB_MATRIX=$(jq -nc '[range(0; $num)]' --argjson num $NUM_JOBS)
           echo "job_matrix=$JOB_MATRIX" >> $GITHUB_OUTPUT
 
@@ -74,7 +71,6 @@ jobs:
         run: |
           if [ -f "proxies_${{ matrix.job_index }}.txt" ]; then
             mkdir -p results_dir_${{ matrix.job_index }}
-            # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Убран лишний префикс 'subagregator/' ---
             python check_proxies.py proxies_${{ matrix.job_index }}.txt results_dir_${{ matrix.job_index }}
           else
             echo "Proxy chunk for job ${{ matrix.job_index }} is empty. Skipping."
@@ -91,14 +87,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: check
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-      
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
       - name: Download all result batches
         uses: actions/download-artifact@v4
         with:
@@ -122,16 +110,17 @@ jobs:
           echo "Aggregating results by country..."
           find temp_results -type f -name "*.txt" | while read -r file; do
             filename=$(basename "$file")
+            # Простое объединение файлов, так как дубликатов быть не должно
             cat "$file" >> "$TARGET_DIR/$filename"
           done
-          
-          echo "Running final smart deduplication..."
-          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Убран лишний префикс 'subagregator/' ---
-          python deduplicate.py "$TARGET_DIR"
           
           echo "Creating combined test.txt file..."
           rm -f target_repo/test.txt
           cat "$TARGET_DIR"/*.txt > target_repo/test.txt || true
+          
+          # На всякий случай удалим пустые строки из финальных файлов
+          find "$TARGET_DIR" -type f -name "*.txt" -exec sed -i '/^$/d' {} +
+          sed -i '/^$/d' target_repo/test.txt || true
           
           TOTAL_PROXIES=$(wc -l < target_repo/test.txt)
           echo "Total unique working REALITY proxies found: $TOTAL_PROXIES"

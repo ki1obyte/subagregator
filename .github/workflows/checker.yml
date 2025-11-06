@@ -19,6 +19,8 @@ jobs:
           grep -E 'pbk=[^&]+|security=reality' all_proxies.txt > reality_proxies.txt || true
           
           NUM_JOBS=15
+          # Удаляем пустые строки перед разделением, чтобы избежать пустых файлов
+          sed -i '/^$/d' reality_proxies.txt
           split -d -n l/$NUM_JOBS reality_proxies.txt proxies_
           
           for i in $(seq 0 $((NUM_JOBS - 1))); do
@@ -61,19 +63,17 @@ jobs:
           path: xray
           key: ${{ runner.os }}-xray-core-${{ env.XRAY_VERSION }}
       - name: Install dependencies
-        run: pip install requests PySocks
+        run: pip install requests
       - name: Download specific proxy chunk
         uses: actions/download-artifact@v4
         with:
           name: proxy-chunks
       
-      # --- ИЗМЕНЕНИЕ: Создаем папку для результатов и передаем ее в скрипт ---
       - name: Run proxy check on chunk
         run: |
           mkdir -p results_dir_${{ matrix.job_index }}
           python check_proxies.py proxies_${{ matrix.job_index }}.txt results_dir_${{ matrix.job_index }}
 
-      # --- ИЗМЕНЕНИЕ: Загружаем папку с результатами, а не один файл ---
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
@@ -91,7 +91,7 @@ jobs:
           pattern: results-batch-*
           path: temp_results/
 
-      - name: Combine results and push to target repo
+      - name: Combine and Push Results
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
@@ -111,11 +111,22 @@ jobs:
             cat "$file" >> "$TARGET_DIR/$filename"
           done
           
+          # --- НОВЫЙ ШАГ: Финальная дедупликация после объединения всех файлов ---
+          echo "Deduplicating and cleaning up aggregated files..."
+          find "$TARGET_DIR" -type f -name "*.txt" -print0 | while IFS= read -r -d '' file; do
+            # Используем sort -u для удаления дубликатов и временный файл для надежности
+            sort -u "$file" -o "$file"
+            # Удаляем пустые строки, которые могли остаться
+            sed -i '/^$/d' "$file"
+          done
+          
           echo "Creating combined test.txt file..."
+          # Удаляем старый файл перед созданием нового
+          rm -f target_repo/test.txt
           cat "$TARGET_DIR"/*.txt > target_repo/test.txt || true
           
           TOTAL_PROXIES=$(wc -l < target_repo/test.txt)
-          echo "Total working REALITY proxies found: $TOTAL_PROXIES"
+          echo "Total unique working REALITY proxies found: $TOTAL_PROXIES"
           
           cd target_repo
           git config --local user.email "action@github.com"
@@ -123,15 +134,11 @@ jobs:
           
           git add splitted-by-country-reality/ test.txt
           
-          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: более надежный синтаксис if/else ---
-          # Проверяем, есть ли изменения для коммита
           if git diff --staged --quiet
           then
-            # Если изменений нет
             echo "No changes to commit."
           else
-            # Если изменения есть
-            COMMIT_MESSAGE="($(date +'%Y-%m-%d %H:%M')) - $TOTAL_PROXIES total"
+            COMMIT_MESSAGE="($(date +'%Y-%m-%d %H:%M')) - $TOTAL_PROXIES total unique"
             echo "Creating commit with message: $COMMIT_MESSAGE"
             git commit -m "$COMMIT_MESSAGE"
             

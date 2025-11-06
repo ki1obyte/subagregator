@@ -1,4 +1,4 @@
-# check_proxies.py (исправленная версия с работающей дедупликацией)
+# check_proxies.py (финальная версия с дедупликацией по ключевым параметрам)
 
 import requests
 import subprocess
@@ -77,7 +77,7 @@ def get_country_name(code):
 
 def read_proxies_from_file(filepath):
     """
-    Читает VLESS URL из файла и выполняет надежную дедупликацию, игнорируя ремарки.
+    Читает VLESS URL из файла и выполняет надежную дедупликацию по КЛЮЧЕВЫМ параметрам.
     """
     print(f"Reading and deduplicating proxies from {filepath}...")
     unique_proxies = set()
@@ -91,21 +91,24 @@ def read_proxies_from_file(filepath):
         for line in raw_vless_lines:
             try:
                 parsed_url = urlparse(line)
-                core_id = parsed_url.netloc
                 params = parse_qs(parsed_url.query)
                 
-                # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-                # Преобразуем значения-списки в кортежи, чтобы сделать их хешируемыми (т.е. пригодными для set)
-                # Сортируем по ключам для консистентности.
-                params_id = tuple(sorted((k, tuple(v)) for k, v in params.items()))
-                
-                proxy_id = (core_id, params_id)
+                # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Создаем "отпечаток" только из ключевых параметров ---
+                core_id = parsed_url.netloc
+                # Извлекаем только те параметры, которые критичны для идентификации сервера
+                pbk = params.get('pbk', [''])[0]
+                sni = params.get('sni', [''])[0]
+                network_type = params.get('type', ['tcp'])[0]
 
-                if proxy_id not in unique_proxies:
-                    unique_proxies.add(proxy_id)
+                # Уникальный идентификатор прокси-сервера
+                proxy_fingerprint = (core_id, pbk, sni, network_type)
+
+                if proxy_fingerprint not in unique_proxies:
+                    unique_proxies.add(proxy_fingerprint)
                     valid_lines.append(line)
-            except Exception:
+            except Exception as e:
                 # Игнорируем строки, которые не удалось распарсить
+                # print(f"Skipping unparsable line: {line[:30]}... Error: {e}")
                 continue
         
         print(f"Successfully read {len(raw_vless_lines)} VLESS links. Found {len(valid_lines)} unique proxies for checking.")

@@ -1,4 +1,4 @@
-# check_proxies.py (финальная версия с улучшенной дедупликацией)
+# check_proxies.py (исправленная версия с работающей дедупликацией)
 
 import requests
 import subprocess
@@ -91,13 +91,14 @@ def read_proxies_from_file(filepath):
         for line in raw_vless_lines:
             try:
                 parsed_url = urlparse(line)
-                # Основа идентификатора: user@host:port
                 core_id = parsed_url.netloc
-                # Параметры: сортируем для консистентности
                 params = parse_qs(parsed_url.query)
-                params_id = tuple(sorted(params.items()))
                 
-                # Создаем уникальный ключ из основы и отсортированных параметров
+                # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+                # Преобразуем значения-списки в кортежи, чтобы сделать их хешируемыми (т.е. пригодными для set)
+                # Сортируем по ключам для консистентности.
+                params_id = tuple(sorted((k, tuple(v)) for k, v in params.items()))
+                
                 proxy_id = (core_id, params_id)
 
                 if proxy_id not in unique_proxies:

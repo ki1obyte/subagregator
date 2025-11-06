@@ -100,7 +100,7 @@ jobs:
           echo "Cloning target repository..."
           git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/ki1obyte/325234657545.git target_repo
           
-          TARGET_DIR="target_repo/splitted-by-country"
+          TARGET_DIR="target_repo/splitted-by-country-reality"
           echo "Preparing target directory: $TARGET_DIR"
           mkdir -p "$TARGET_DIR"
           rm -rf "$TARGET_DIR"/*
@@ -121,7 +121,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-          git add splitted-by-country/ test.txt
+          git add splitted-by-country-reality/ test.txt
           
           # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: более надежный синтаксис if/else ---
           # Проверяем, есть ли изменения для коммита

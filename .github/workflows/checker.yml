@@ -28,8 +28,8 @@ jobs:
           NUM_JOBS=15
           SOURCE_URL="https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt"
           
-          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Указан правильный путь к скрипту ---
-          python subagregator/prepare_and_split.py "$SOURCE_URL" $NUM_JOBS
+          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Убран лишний префикс 'subagregator/' ---
+          python prepare_and_split.py "$SOURCE_URL" $NUM_JOBS
           
           JOB_MATRIX=$(jq -nc '[range(0; $num)]' --argjson num $NUM_JOBS)
           echo "job_matrix=$JOB_MATRIX" >> $GITHUB_OUTPUT
@@ -74,8 +74,8 @@ jobs:
         run: |
           if [ -f "proxies_${{ matrix.job_index }}.txt" ]; then
             mkdir -p results_dir_${{ matrix.job_index }}
-            # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Указан правильный путь к скрипту ---
-            python subagregator/check_proxies.py proxies_${{ matrix.job_index }}.txt results_dir_${{ matrix.job_index }}
+            # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Убран лишний префикс 'subagregator/' ---
+            python check_proxies.py proxies_${{ matrix.job_index }}.txt results_dir_${{ matrix.job_index }}
           else
             echo "Proxy chunk for job ${{ matrix.job_index }} is empty. Skipping."
             mkdir -p results_dir_${{ matrix.job_index }}
@@ -126,8 +126,8 @@ jobs:
           done
           
           echo "Running final smart deduplication..."
-          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Указан правильный путь к скрипту ---
-          python subagregator/deduplicate.py "$TARGET_DIR"
+          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Убран лишний префикс 'subagregator/' ---
+          python deduplicate.py "$TARGET_DIR"
           
           echo "Creating combined test.txt file..."
           rm -f target_repo/test.txt

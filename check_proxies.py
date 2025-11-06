@@ -77,41 +77,16 @@ def get_country_name(code):
 
 def read_proxies_from_file(filepath):
     """
-    Читает VLESS URL из файла и выполняет надежную дедупликацию по КЛЮЧЕВЫМ параметрам.
+    Читает VLESS URL из файла. Дедупликация не требуется,
+    т.к. предполагается, что входной файл уже уникален.
     """
-    print(f"Reading and deduplicating proxies from {filepath}...")
-    unique_proxies = set()
-    valid_lines = []
+    print(f"Reading proxies from {filepath}...")
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             lines = f.read().strip().split('\n')
-        
-        raw_vless_lines = [line for line in lines if line.strip().startswith('vless://')]
-        
-        for line in raw_vless_lines:
-            try:
-                parsed_url = urlparse(line)
-                params = parse_qs(parsed_url.query)
-                
-                # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Создаем "отпечаток" только из ключевых параметров ---
-                core_id = parsed_url.netloc
-                # Извлекаем только те параметры, которые критичны для идентификации сервера
-                pbk = params.get('pbk', [''])[0]
-                sni = params.get('sni', [''])[0]
-                network_type = params.get('type', ['tcp'])[0]
-
-                # Уникальный идентификатор прокси-сервера
-                proxy_fingerprint = (core_id, pbk, sni, network_type)
-
-                if proxy_fingerprint not in unique_proxies:
-                    unique_proxies.add(proxy_fingerprint)
-                    valid_lines.append(line)
-            except Exception as e:
-                # Игнорируем строки, которые не удалось распарсить
-                # print(f"Skipping unparsable line: {line[:30]}... Error: {e}")
-                continue
-        
-        print(f"Successfully read {len(raw_vless_lines)} VLESS links. Found {len(valid_lines)} unique proxies for checking.")
+        # Просто берем все непустые строки vless
+        valid_lines = [line for line in lines if line.strip().startswith('vless://')]
+        print(f"Read {len(valid_lines)} VLESS links to check.")
         return valid_lines
     except FileNotFoundError:
         print(f"Input file not found: {filepath}. It might be empty, which is normal.")
@@ -293,4 +268,5 @@ if __name__ == "__main__":
     print(f"Check complete. Found {total_working} working proxies in this batch.")
     print(f"Results saved to directory: {output_dir}")
     print(f"======================================")
+
 

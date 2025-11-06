@@ -19,7 +19,6 @@ jobs:
           grep -E 'pbk=[^&]+|security=reality' all_proxies.txt > reality_proxies.txt || true
           
           NUM_JOBS=15
-          # Удаляем пустые строки перед разделением, чтобы избежать пустых файлов
           sed -i '/^$/d' reality_proxies.txt
           split -d -n l/$NUM_JOBS reality_proxies.txt proxies_
           
@@ -38,7 +37,7 @@ jobs:
           name: proxy-chunks
           path: proxies_*.txt
 
-  # ЗАДАНИЕ 2: ПАРАЛЛЕЛЬНАЯ ПРОВЕРКА
+  # ЗАДАНИЕ 2: ПАРАЛЛЕЛЬНАЯ ПРОВЕРКА (без изменений)
   check:
     runs-on: ubuntu-latest
     needs: prepare
@@ -80,7 +79,7 @@ jobs:
           name: results-batch-${{ matrix.job_index }}
           path: results_dir_${{ matrix.job_index }}/
 
-  # ЗАДАНИЕ 3: СБОРКА РЕЗУЛЬТАТОВ
+  # ЗАДАНИЕ 3: СБОРКА РЕЗУЛЬТАТОВ (с исправлением)
   collect:
     runs-on: ubuntu-latest
     needs: check
@@ -111,17 +110,16 @@ jobs:
             cat "$file" >> "$TARGET_DIR/$filename"
           done
           
-          # --- НОВЫЙ ШАГ: Финальная дедупликация после объединения всех файлов ---
-          echo "Deduplicating and cleaning up aggregated files..."
+          # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Финальная умная дедупликация ---
+          echo "Deduplicating aggregated files, ignoring remarks..."
           find "$TARGET_DIR" -type f -name "*.txt" -print0 | while IFS= read -r -d '' file; do
-            # Используем sort -u для удаления дубликатов и временный файл для надежности
-            sort -u "$file" -o "$file"
+            # Используем sort с разделителем '#' для удаления дубликатов по основной части URL
+            sort -t'#' -k1,1 -u "$file" -o "$file"
             # Удаляем пустые строки, которые могли остаться
             sed -i '/^$/d' "$file"
           done
           
           echo "Creating combined test.txt file..."
-          # Удаляем старый файл перед созданием нового
           rm -f target_repo/test.txt
           cat "$TARGET_DIR"/*.txt > target_repo/test.txt || true
           

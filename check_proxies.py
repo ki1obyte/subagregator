@@ -172,7 +172,7 @@ def check_proxy(proxy_url):
     
     print(f"\n--- Checking proxy: {ip_port} {remark} ({network_type}) ---")
 
-    max_retries = 10
+    max_retries = 3
     retry_delay = 2
 
     for attempt in range(max_retries):
@@ -293,3 +293,4 @@ if __name__ == "__main__":
     print(f"Check complete. Found {total_working} working proxies in this batch.")
     print(f"Results saved to directory: {output_dir}")
     print(f"======================================")
+

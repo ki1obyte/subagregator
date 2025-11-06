@@ -1,4 +1,4 @@
-# check_proxies.py (финальная версия с определением страны)
+# check_proxies.py (финальная версия с определением страны и умной дедупликацией)
 
 import requests
 import subprocess
@@ -77,13 +77,37 @@ def get_country_name(code):
     return COUNTRY_CODES.get(code.upper(), code.upper()) # Если код не найден, вернем сам код
 
 def read_proxies_from_file(filepath):
-    """Читает VLESS URL из файла."""
-    print(f"Reading proxies from {filepath}...")
+    """
+    Читает VLESS URL из файла и выполняет дедупликацию, игнорируя ремарки.
+    """
+    print(f"Reading and deduplicating proxies from {filepath}...")
+    unique_proxies = set()
+    valid_lines = []
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             lines = f.read().strip().split('\n')
-        valid_lines = [line for line in lines if line.strip().startswith('vless://')]
-        print(f"Successfully read {len(valid_lines)} VLESS links.")
+        
+        raw_vless_lines = [line for line in lines if line.strip().startswith('vless://')]
+        
+        for line in raw_vless_lines:
+            parsed = parse_vless(line)
+            if parsed:
+                # Создаем уникальный идентификатор на основе ключевых параметров, игнорируя ремарку
+                proxy_id = (
+                    parsed['id'],
+                    parsed['address'],
+                    parsed['port'],
+                    parsed.get('network'),
+                    parsed.get('security'),
+                    parsed.get('sni'),
+                    parsed.get('ws_path'),
+                    parsed.get('grpc_serviceName')
+                )
+                if proxy_id not in unique_proxies:
+                    unique_proxies.add(proxy_id)
+                    valid_lines.append(line)
+        
+        print(f"Successfully read {len(raw_vless_lines)} VLESS links. Found {len(valid_lines)} unique proxies.")
         return valid_lines
     except FileNotFoundError:
         print(f"Input file not found: {filepath}. It might be empty, which is normal.")
@@ -109,7 +133,7 @@ def parse_vless(vless_url):
             'grpc_serviceName': params.get('serviceName', [''])[0], 'remark': remark
         }
     except Exception as e:
-        print(f"Failed to parse VLESS URL: {vless_url} | Error: {e}")
+        # Убрано избыточное логирование ошибок парсинга, т.к. read_proxies_from_file их обрабатывает
         return None
 
 def setup_xray():
@@ -208,11 +232,9 @@ def check_proxy(proxy_url):
             stdout_str = result.stdout.decode('utf-8', errors='ignore')
             
             if result.returncode == 0 and 'fl=' in stdout_str:
-                # --- ИЗМЕНЕНИЕ: Ищем код страны в выводе ---
                 country_match = re.search(r'loc=([A-Z]{2})', stdout_str)
                 country_code = country_match.group(1) if country_match else "Unknown"
                 print(f"SUCCESS: Proxy is working. Latency: {latency:.2f} ms. Country: {country_code}")
-                # --- ИЗМЕНЕНИЕ: Возвращаем URL и код страны ---
                 return (proxy_url, country_code)
             else:
                 stderr_str = result.stderr.decode('utf-8', errors='ignore')
@@ -236,18 +258,15 @@ def check_proxy(proxy_url):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        # --- ИЗМЕНЕНИЕ: Обновляем инструкцию по использованию ---
         print("Usage: python check_proxies.py <input_file> <output_directory>")
         sys.exit(1)
 
     input_file = sys.argv[1]
     output_dir = sys.argv[2]
     
-    # --- ИЗМЕНЕНИЕ: Создаем выходную директорию, если ее нет ---
     os.makedirs(output_dir, exist_ok=True)
 
     proxies_to_check = read_proxies_from_file(input_file)
-    # --- ИЗМЕНЕНИЕ: Используем словарь для группировки прокси по странам ---
     proxies_by_country = {}
     
     for proxy_url in proxies_to_check:
@@ -260,7 +279,6 @@ if __name__ == "__main__":
                 proxies_by_country[country_name] = []
             proxies_by_country[country_name].append(url)
 
-    # --- ИЗМЕНЕНИЕ: Сохраняем результаты в отдельные файлы по странам ---
     total_working = 0
     for country, proxies in proxies_by_country.items():
         total_working += len(proxies)

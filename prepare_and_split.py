@@ -1,6 +1,7 @@
 # prepare_and_split.py
 import requests
 import sys
+import base64
 from urllib.parse import urlparse, parse_qs
 
 def get_proxy_fingerprint(vless_url):
@@ -28,33 +29,58 @@ def get_proxy_fingerprint(vless_url):
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python prepare_and_split.py <source_url> <num_jobs>")
+        print("Usage: python prepare_and_split.py <source_urls> <num_jobs>")
         sys.exit(1)
 
-    source_url = sys.argv[1]
+    # Принимаем строку с URL, разделенную пробелами или переносами
+    source_urls = sys.argv[1].split()
+    
     try:
         num_jobs = int(sys.argv[2])
     except ValueError:
         print("Error: num_jobs must be an integer.")
         sys.exit(1)
 
-    print(f"Fetching proxies from {source_url}...")
-    try:
-        response = requests.get(source_url, timeout=30)
-        response.raise_for_status()
-        lines = response.text.strip().split('\n')
-    except requests.RequestException as e:
-        print(f"Failed to fetch proxies: {e}")
-        sys.exit(1)
+    print(f"Processing {len(source_urls)} sources...")
+    all_lines = []
 
-    print(f"Initial proxies found: {len(lines)}")
+    # Проходим по всем источникам
+    for url in source_urls:
+        if not url.strip(): continue
+        print(f"Fetching proxies from: {url}")
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            content = response.text.strip()
+            
+            # --- Блок обработки Base64 ---
+            # Если в тексте нет '://', скорее всего это Base64
+            if '://' not in content and len(content) > 10:
+                try:
+                    # Добавляем паддинг (=), если нужно, и декодируем
+                    decoded_bytes = base64.b64decode(content + '=' * (-len(content) % 4))
+                    content = decoded_bytes.decode('utf-8', errors='ignore')
+                    print("  -> Successfully decoded Base64 content.")
+                except Exception:
+                    print("  -> Failed to decode Base64, treating as plain text.")
+            # -----------------------------
+
+            new_lines = content.split('\n')
+            all_lines.extend(new_lines)
+            print(f"  -> Found {len(new_lines)} lines.")
+            
+        except requests.RequestException as e:
+            print(f"  -> Failed to fetch proxies from {url}: {e}")
+
+    print(f"Total raw lines collected: {len(all_lines)}")
 
     # 1. Фильтрация: оставляем только VLESS с REALITY
+    # Это ключевой фильтр, который ты просил не удалять
     reality_proxies = [
-        line for line in lines 
+        line.strip() for line in all_lines 
         if line.strip().startswith('vless://') and 'security=reality' in line
     ]
-    print(f"Found {len(reality_proxies)} REALITY proxies.")
+    print(f"Found {len(reality_proxies)} potential REALITY proxies.")
 
     # 2. Дедупликация по ключевым параметрам
     unique_proxies = {}

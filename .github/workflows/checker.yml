@@ -26,8 +26,13 @@ jobs:
         id: split
         run: |
           NUM_JOBS=15
-          SOURCE_URL="https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt"
-          python prepare_and_split.py "$SOURCE_URL" $NUM_JOBS
+          # Сюда можно добавлять новые источники через пробел или с новой строки
+          SOURCE_URLS="https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt
+          https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vless"
+          
+          # Передаем список URL одной строкой
+          python prepare_and_split.py "$SOURCE_URLS" $NUM_JOBS
+          
           JOB_MATRIX=$(jq -nc '[range(0; $num)]' --argjson num $NUM_JOBS)
           echo "job_matrix=$JOB_MATRIX" >> $GITHUB_OUTPUT
 

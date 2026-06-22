@@ -58,22 +58,22 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vless",
-        "servers": 6506
+        "servers": 6380
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vmess",
-        "servers": 4446
+        "servers": 4435
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/trojan",
-        "servers": 1890
+        "servers": 1897
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/ss",
-        "servers": 2876
+        "servers": 2884
       }
     ]
   },
@@ -84,17 +84,17 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vless.txt",
-        "servers": 5309
+        "servers": 5203
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vmess.txt",
-        "servers": 1140
+        "servers": 1175
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/ss.txt",
-        "servers": 669
+        "servers": 706
       },
       {
         "protocol": "SSR",
@@ -104,7 +104,7 @@
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/trojan.txt",
-        "servers": 779
+        "servers": 810
       }
     ]
   },
@@ -115,22 +115,22 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/shabane/kamaji/master/hub/vless.txt",
-        "servers": 1202
+        "servers": 1252
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/shabane/kamaji/master/hub/vmess.txt",
-        "servers": 104
+        "servers": 69
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/shabane/kamaji/master/hub/trojan.txt",
-        "servers": 185
+        "servers": 171
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/shabane/kamaji/master/hub/ss.txt",
-        "servers": 1428
+        "servers": 1429
       }
     ]
   },
@@ -141,22 +141,22 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/vless",
-        "servers": 915
+        "servers": 932
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/vmess",
-        "servers": 88
+        "servers": 89
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/trojan",
-        "servers": 82
+        "servers": 87
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/ss",
-        "servers": 1070
+        "servers": 1087
       }
     ]
   },
@@ -214,7 +214,7 @@
       {
         "protocol": "HTTPS",
         "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/HTTPS_RAW.txt",
-        "servers": 99
+        "servers": 65
       },
       {
         "protocol": "SOCKS4",
@@ -240,7 +240,7 @@
       {
         "protocol": "LalatinaHub",
         "url": "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes",
-        "servers": 2545
+        "servers": 2418
       },
       {
         "protocol": "istanbulsydneyhotel",
@@ -275,7 +275,7 @@
       {
         "protocol": "Pawdroid",
         "url": "https://raw.githubusercontent.com/Pawdroid/Free-servers/refs/heads/main/static/sub_ru",
-        "servers": 18
+        "servers": 20
       }
     ]
   }

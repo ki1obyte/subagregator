@@ -1,7 +1,7 @@
 [
   {
     "groupName": "⭐ Проверенные",
-    "date": "2026-07-02",
+    "date": "2026-07-03",
     "subscriptions": [
       {
         "protocol": "Working VLESS Reality",
@@ -17,7 +17,7 @@
   },
   {
     "groupName": "F0rc3Run",
-    "date": "2026-07-02",
+    "date": "2026-07-03",
     "subscriptions": [
       {
         "protocol": "Proxies",
@@ -53,48 +53,48 @@
   },
   {
     "groupName": "mheidari98",
-    "date": "2026-07-02",
+    "date": "2026-07-03",
     "subscriptions": [
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vless",
-        "servers": 6441
+        "servers": 6599
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vmess",
-        "servers": 4307
+        "servers": 4314
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/trojan",
-        "servers": 2280
+        "servers": 2292
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/ss",
-        "servers": 2876
+        "servers": 2878
       }
     ]
   },
   {
     "groupName": "Epodonios",
-    "date": "2026-07-02",
+    "date": "2026-07-03",
     "subscriptions": [
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vless.txt",
-        "servers": 5100
+        "servers": 5104
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vmess.txt",
-        "servers": 199
+        "servers": 202
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/ss.txt",
-        "servers": 496
+        "servers": 499
       },
       {
         "protocol": "SSR",
@@ -104,13 +104,13 @@
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/trojan.txt",
-        "servers": 1124
+        "servers": 1182
       }
     ]
   },
   {
     "groupName": "shabane",
-    "date": "2026-07-02",
+    "date": "2026-07-03",
     "subscriptions": [
       {
         "protocol": "VLESS",
@@ -136,7 +136,7 @@
   },
   {
     "groupName": "MhdiTaheri",
-    "date": "2026-07-02",
+    "date": "2026-07-03",
     "subscriptions": [
       {
         "protocol": "VLESS",
@@ -162,7 +162,7 @@
   },
   {
     "groupName": "wuqb2i4f",
-    "date": "2026-07-02",
+    "date": "2026-07-03",
     "subscriptions": [
       {
         "protocol": "Trojan",
@@ -183,7 +183,7 @@
   },
   {
     "groupName": "mahdibland",
-    "date": "2026-07-02",
+    "date": "2026-07-03",
     "subscriptions": [
       {
         "protocol": "VMess",
@@ -209,12 +209,12 @@
   },
   {
     "groupName": "roosterkid",
-    "date": "2026-07-02",
+    "date": "2026-07-03",
     "subscriptions": [
       {
         "protocol": "HTTPS",
         "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/HTTPS_RAW.txt",
-        "servers": 105
+        "servers": 88
       },
       {
         "protocol": "SOCKS4",
@@ -224,7 +224,7 @@
       {
         "protocol": "SOCKS5",
         "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/SOCKS5_RAW.txt",
-        "servers": 10
+        "servers": 8
       },
       {
         "protocol": "V2Ray",
@@ -235,12 +235,12 @@
   },
   {
     "groupName": "group-mixed",
-    "date": "2026-07-02",
+    "date": "2026-07-03",
     "subscriptions": [
       {
         "protocol": "LalatinaHub",
         "url": "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes",
-        "servers": 2076
+        "servers": 2117
       },
       {
         "protocol": "acymz",
@@ -270,7 +270,7 @@
       {
         "protocol": "Pawdroid",
         "url": "https://raw.githubusercontent.com/Pawdroid/Free-servers/refs/heads/main/static/sub_ru",
-        "servers": 15
+        "servers": 18
       }
     ]
   }

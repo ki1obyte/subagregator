@@ -58,22 +58,22 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vless",
-        "servers": 6784
+        "servers": 6604
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vmess",
-        "servers": 4304
+        "servers": 4295
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/trojan",
-        "servers": 2458
+        "servers": 2464
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/ss",
-        "servers": 2897
+        "servers": 2899
       }
     ]
   },
@@ -84,7 +84,7 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vless.txt",
-        "servers": 5314
+        "servers": 5320
       },
       {
         "protocol": "VMess",
@@ -141,7 +141,7 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/vless",
-        "servers": 681
+        "servers": 638
       },
       {
         "protocol": "VMess",
@@ -151,12 +151,12 @@
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/trojan",
-        "servers": 162
+        "servers": 168
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/ss",
-        "servers": 816
+        "servers": 771
       }
     ]
   },
@@ -172,12 +172,12 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/refs/heads/main/output/base64/mix-protocol-vl",
-        "servers": 350
+        "servers": 301
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/refs/heads/main/output/base64/mix-protocol-vm",
-        "servers": 68
+        "servers": 67
       }
     ]
   },
@@ -214,7 +214,7 @@
       {
         "protocol": "HTTPS",
         "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/HTTPS_RAW.txt",
-        "servers": 98
+        "servers": 92
       },
       {
         "protocol": "SOCKS4",
@@ -224,7 +224,7 @@
       {
         "protocol": "SOCKS5",
         "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/SOCKS5_RAW.txt",
-        "servers": 10
+        "servers": 13
       },
       {
         "protocol": "V2Ray",
@@ -240,7 +240,7 @@
       {
         "protocol": "LalatinaHub",
         "url": "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes",
-        "servers": 1984
+        "servers": 2041
       },
       {
         "protocol": "acymz",

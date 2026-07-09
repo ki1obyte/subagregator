@@ -58,22 +58,22 @@
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vless",
-        "servers": 7972
+        "servers": 7202
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vmess",
-        "servers": 4427
+        "servers": 4390
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/trojan",
-        "servers": 2777
+        "servers": 2735
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/ss",
-        "servers": 2906
+        "servers": 2903
       }
     ]
   },
@@ -82,9 +82,14 @@
     "date": "2026-07-09",
     "subscriptions": [
       {
+        "protocol": "VLESS",
+        "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vless.txt",
+        "servers": 4886
+      },
+      {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vmess.txt",
-        "servers": 203
+        "servers": 204
       },
       {
         "protocol": "Shadowsocks",
@@ -142,6 +147,11 @@
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/trojan",
         "servers": 134
+      },
+      {
+        "protocol": "Shadowsocks",
+        "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/ss",
+        "servers": 855
       }
     ]
   },
@@ -199,7 +209,7 @@
       {
         "protocol": "HTTPS",
         "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/HTTPS_RAW.txt",
-        "servers": 150
+        "servers": 146
       },
       {
         "protocol": "SOCKS4",
@@ -209,7 +219,7 @@
       {
         "protocol": "SOCKS5",
         "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/SOCKS5_RAW.txt",
-        "servers": 10
+        "servers": 5
       },
       {
         "protocol": "V2Ray",
@@ -225,7 +235,7 @@
       {
         "protocol": "LalatinaHub",
         "url": "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes",
-        "servers": 2104
+        "servers": 2102
       },
       {
         "protocol": "acymz",

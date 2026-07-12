@@ -1,7 +1,7 @@
 [
   {
     "groupName": "⭐ Проверенные",
-    "date": "2026-07-11",
+    "date": "2026-07-12",
     "subscriptions": [
       {
         "protocol": "Working VLESS Reality",
@@ -17,95 +17,95 @@
   },
   {
     "groupName": "F0rc3Run",
-    "date": "2026-07-11",
+    "date": "2026-07-12",
     "subscriptions": [
       {
         "protocol": "Proxies",
         "url": "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/Best-Results/proxies.txt",
-        "servers": 1529
+        "servers": 1901
       },
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vless.txt",
-        "servers": 834
+        "servers": 1130
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/vmess.txt",
-        "servers": 90
+        "servers": 93
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/shadowsocks.txt",
-        "servers": 374
+        "servers": 396
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/refs/heads/main/splitted-by-protocol/trojan.txt",
-        "servers": 231
+        "servers": 282
       },
       {
         "protocol": "Telegram",
         "url": "https://raw.githubusercontent.com/F0rc3Run/F0rc3Run/main/Special/Telegram.txt",
-        "servers": 562
+        "servers": 484
       }
     ]
   },
   {
     "groupName": "mheidari98",
-    "date": "2026-07-11",
+    "date": "2026-07-12",
     "subscriptions": [
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vless",
-        "servers": 6660
+        "servers": 6783
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vmess",
-        "servers": 4377
+        "servers": 4378
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/trojan",
-        "servers": 2330
+        "servers": 2355
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/ss",
-        "servers": 2911
+        "servers": 2916
       }
     ]
   },
   {
     "groupName": "Epodonios",
-    "date": "2026-07-11",
+    "date": "2026-07-12",
     "subscriptions": [
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vless.txt",
-        "servers": 4689
+        "servers": 4727
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/vmess.txt",
-        "servers": 167
+        "servers": 160
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/ss.txt",
-        "servers": 570
+        "servers": 574
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Splitted-By-Protocol/trojan.txt",
-        "servers": 884
+        "servers": 891
       }
     ]
   },
   {
     "groupName": "shabane",
-    "date": "2026-07-11",
+    "date": "2026-07-12",
     "subscriptions": [
       {
         "protocol": "VLESS",
@@ -131,33 +131,33 @@
   },
   {
     "groupName": "MhdiTaheri",
-    "date": "2026-07-11",
+    "date": "2026-07-12",
     "subscriptions": [
       {
         "protocol": "VLESS",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/vless",
-        "servers": 691
+        "servers": 753
       },
       {
         "protocol": "VMess",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/vmess",
-        "servers": 82
+        "servers": 84
       },
       {
         "protocol": "Trojan",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/trojan",
-        "servers": 109
+        "servers": 110
       },
       {
         "protocol": "Shadowsocks",
         "url": "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/ss",
-        "servers": 822
+        "servers": 888
       }
     ]
   },
   {
     "groupName": "wuqb2i4f",
-    "date": "2026-07-11",
+    "date": "2026-07-12",
     "subscriptions": [
       {
         "protocol": "Trojan",
@@ -178,7 +178,7 @@
   },
   {
     "groupName": "mahdibland",
-    "date": "2026-07-11",
+    "date": "2026-07-12",
     "subscriptions": [
       {
         "protocol": "VMess",
@@ -204,12 +204,12 @@
   },
   {
     "groupName": "roosterkid",
-    "date": "2026-07-11",
+    "date": "2026-07-12",
     "subscriptions": [
       {
         "protocol": "HTTPS",
         "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/refs/heads/main/HTTPS_RAW.txt",
-        "servers": 118
+        "servers": 101
       },
       {
         "protocol": "SOCKS4",
@@ -230,17 +230,17 @@
   },
   {
     "groupName": "group-mixed",
-    "date": "2026-07-11",
+    "date": "2026-07-12",
     "subscriptions": [
       {
         "protocol": "LalatinaHub",
         "url": "https://raw.githubusercontent.com/LalatinaHub/Mineral/refs/heads/master/result/nodes",
-        "servers": 2068
+        "servers": 2069
       },
       {
         "protocol": "acymz",
         "url": "https://raw.githubusercontent.com/acymz/AutoVPN/refs/heads/main/data/V2.txt",
-        "servers": 161
+        "servers": 115
       },
       {
         "protocol": "AzadNetCH",
@@ -265,7 +265,7 @@
       {
         "protocol": "Pawdroid",
         "url": "https://raw.githubusercontent.com/Pawdroid/Free-servers/refs/heads/main/static/sub_ru",
-        "servers": 14
+        "servers": 17
       }
     ]
   }
